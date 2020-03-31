@@ -55,6 +55,12 @@ add_library(jni-lib
 
         src/main/cpp/native-lib.cpp
 
+        src/main/cpp/zedaudio/zed-audio-lib.cpp
+
+        src/main/cpp/ffmpeg/ZedFfmpeg.cpp
+
+        src/main/cpp/cjava/CCallJava.cpp
+
         #[[src/main/cpp/CCallJava.cpp
 
         src/main/cpp/WlFFmpeg.cpp
