@@ -1,2 +1,3 @@
 rootProject.name='ZedPlayer'
 include ':app'
+include ':zedmediaplayerlib'
