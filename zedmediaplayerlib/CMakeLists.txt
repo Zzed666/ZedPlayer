@@ -61,15 +61,11 @@ add_library(jni-lib
 
         src/main/cpp/cjava/CCallJava.cpp
 
-        #[[src/main/cpp/CCallJava.cpp
+        src/main/cpp/zedaudio/ZedAudio.cpp
 
-        src/main/cpp/WlFFmpeg.cpp
+        src/main/cpp/queues/ZedQueue.cpp
 
-        src/main/cpp/WlPlayStatus.cpp
-
-        src/main/cpp/WlAudio.cpp
-
-        src/main/cpp/WlQueue.cpp]])
+        src/main/cpp/status/ZedStatus.cpp)
 
 set_target_properties(
         avcodec

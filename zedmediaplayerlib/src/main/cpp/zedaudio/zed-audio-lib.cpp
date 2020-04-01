@@ -7,9 +7,11 @@
 
 #include "../JniDefine.h"
 #include "../ffmpeg/ZedFfmpeg.h"
+#include "../status/ZedStatus.h"
 
 JavaVM *javaVm = nullptr;
 ZedFfmpeg *zedFfmpeg = nullptr;
+ZedStatus *zedStatus = nullptr;
 CCallJava *cCallJava = nullptr;
 
 extern "C" JNIEXPORT jint JNICALL
@@ -24,8 +26,8 @@ JNI_OnLoad(JavaVM *vm, void *reversed) {
 
 extern "C" JNIEXPORT void JNICALL
 Java_com_github_zedmediaplayerlib_audio_ZedAudioPlayer_n_1prepared(JNIEnv *env,
-                                                             jobject obj,
-                                                             jstring mediaPath_) {
+                                                                   jobject obj,
+                                                                   jstring mediaPath_) {
     const char *mediaPath = env->GetStringUTFChars(mediaPath_, 0);
     if (!mediaPath) {
         if (FFMPEG_LOG) {
@@ -34,10 +36,13 @@ Java_com_github_zedmediaplayerlib_audio_ZedAudioPlayer_n_1prepared(JNIEnv *env,
         return;
     }
     if (cCallJava == nullptr) {
-        cCallJava = new CCallJava(javaVm,env,obj);
+        cCallJava = new CCallJava(javaVm, env, obj);
+    }
+    if(zedStatus == nullptr){
+        zedStatus = new ZedStatus();
     }
     if (zedFfmpeg == nullptr) {
-        zedFfmpeg = new ZedFfmpeg(cCallJava);
+        zedFfmpeg = new ZedFfmpeg(zedStatus,cCallJava);
     }
     zedFfmpeg->prepareMedia(mediaPath);
     env->ReleaseStringUTFChars(mediaPath_, mediaPath);

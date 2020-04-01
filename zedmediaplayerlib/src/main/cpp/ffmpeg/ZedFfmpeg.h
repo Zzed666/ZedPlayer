@@ -7,6 +7,8 @@
 
 #include "../FFmpegDefine.h"
 #include "../cjava/CCallJava.h"
+#include "../status/ZedStatus.h"
+#include "../zedaudio/ZedAudio.h"
 
 class ZedFfmpeg {
 public:
@@ -14,13 +16,16 @@ public:
     AVCodec *pCodec = nullptr;
     AVCodecContext *pCodecCtx = nullptr;
     bool foundAudioStream = false;
-    int audio_index = -1;
 
     CCallJava *cCallJava = nullptr;
+    ZedAudio *zedAudio = nullptr;
+    ZedStatus *zedStatus = nullptr;
+
 public:
-    ZedFfmpeg(CCallJava *cCallJava);
+    ZedFfmpeg(ZedStatus *zedStatus,CCallJava *cCallJava);
     ~ZedFfmpeg();
     void prepareMedia(const char* mediaPath);
+    void start();
 };
 
 

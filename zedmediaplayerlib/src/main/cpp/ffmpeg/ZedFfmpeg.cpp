@@ -4,7 +4,8 @@
 
 #include "ZedFfmpeg.h"
 
-ZedFfmpeg::ZedFfmpeg(CCallJava *cCallJava) {
+ZedFfmpeg::ZedFfmpeg(ZedStatus *zedStatus, CCallJava *cCallJava) {
+    this->zedStatus = zedStatus;
     this->cCallJava = cCallJava;
 }
 
@@ -30,19 +31,22 @@ void ZedFfmpeg::prepareMedia(const char *mediaPath) {
     //循环遍历流
     for (int i = 0; i < pFormatCtx->nb_streams; i++) {
         if (pFormatCtx->streams[i]->codecpar->codec_type == AVMEDIA_TYPE_AUDIO) {
+            if(zedAudio == nullptr){
+                zedAudio = new ZedAudio(zedStatus);
+            }
             foundAudioStream = true;
-            audio_index = i;
+            zedAudio->audio_index = i;
             break;
         }
     }
-    if(!foundAudioStream){
+    if (!foundAudioStream) {
         if (FFMPEG_LOG) {
             FFLOGE("Couldn't find audio.");
         }
         return;
     }
     //获取解码器
-    pCodec = avcodec_find_decoder(pFormatCtx->streams[audio_index]->codecpar->codec_id);
+    pCodec = avcodec_find_decoder(pFormatCtx->streams[zedAudio->audio_index]->codecpar->codec_id);
     if (!pCodec) {
         if (FFMPEG_LOG) {
             FFLOGE("Couldn't get codec.");
@@ -58,20 +62,61 @@ void ZedFfmpeg::prepareMedia(const char *mediaPath) {
         return;
     }
     //给解码器上下文赋值参数
-    if (avcodec_parameters_to_context(pCodecCtx, pFormatCtx->streams[audio_index]->codecpar) < 0) {
+    if (avcodec_parameters_to_context(pCodecCtx,
+                                      pFormatCtx->streams[zedAudio->audio_index]->codecpar) < 0) {
         if (FFMPEG_LOG) {
             FFLOGE("Couldn't params to codecCtx.");
         }
         return;
     }
     //打开解码器
-    if(avcodec_open2(pCodecCtx, pCodec,nullptr) != 0){
+    if (avcodec_open2(pCodecCtx, pCodec, nullptr) != 0) {
         if (FFMPEG_LOG) {
             FFLOGE("Couldn't open codec.");
         }
         return;
     }
     cCallJava->callOnPrepare(CTHREADTYPE_CHILD);
+    start();
+}
+
+void ZedFfmpeg::start() {
+    int count = 0;
+    while (zedStatus != nullptr && !zedStatus->exit) {
+        //读取数据到AVPacket
+        AVPacket *pPacket = av_packet_alloc();
+        if (av_read_frame(pFormatCtx, pPacket) == 0) {
+            if(pPacket->stream_index == zedAudio->audio_index){
+                zedAudio->zedQueue->putPackets(pPacket);
+            } else{
+                av_packet_free(&pPacket);
+                av_free(pPacket);
+                pPacket = nullptr;
+            }
+        } else {
+            if (FFMPEG_LOG) {
+                FFLOGE("decode finished");
+            }
+            av_packet_free(&pPacket);
+            av_free(pPacket);
+            pPacket = nullptr;
+            break;
+        }
+    }
+
+    if (FFMPEG_LOG) {
+        FFLOGI("解码完成");
+    }
+
+    while (zedAudio->zedQueue->getPacketSize() > 0){
+        AVPacket *pPacket = nullptr;
+        pPacket = av_packet_alloc();
+        zedAudio->zedQueue->getPackets(pPacket);
+        av_packet_free(&pPacket);
+        av_free(pPacket);
+        pPacket = nullptr;
+    }
+
 }
 
 ZedFfmpeg::~ZedFfmpeg() {
