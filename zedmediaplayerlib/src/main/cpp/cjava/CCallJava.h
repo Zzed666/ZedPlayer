@@ -20,6 +20,7 @@ public:
     jobject jobj = nullptr;
     jmethodID jloadmid = nullptr;
     jmethodID jpreparemid = nullptr;
+    jmethodID jplaytimemid = nullptr;
     jmethodID jpausemid = nullptr;
     jmethodID jstopmid = nullptr;
 public:
@@ -27,6 +28,7 @@ public:
     ~CCallJava();
     void callOnLoad(int cType, bool load);
     void callOnPrepare(int cType);
+    void callOnPlayTime(int cType, int total, int current);
     void callOnPause(int cType, bool pause);
     void callOnStop(int cType);
 };

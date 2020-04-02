@@ -45,5 +45,17 @@
         app:layout_constraintTop_toBottomOf="@+id/resume"
         android:layout_marginTop="20dp"/>
 
+    <TextView
+        android:id="@+id/play_time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="20dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="30dp"
+        android:text="00:00/00:00"
+        android:textSize="18sp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/stop" />
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

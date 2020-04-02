@@ -4,11 +4,12 @@
 
 #include "ZedAudio.h"
 
-ZedAudio::ZedAudio(ZedStatus *zedStatus, CCallJava *cCallJava) {
+ZedAudio::ZedAudio(ZedStatus *zedStatus, CCallJava *cCallJava, int sample_rate) {
     this->zedStatus = zedStatus;
     this->cCallJava = cCallJava;
+    this->sample_rate = sample_rate;
     zedQueue = new ZedQueue(zedStatus);
-    out_buffer = (uint8_t *) (av_malloc(44100 * 2 * 2));
+    out_buffer = (uint8_t *) (av_malloc(sample_rate * 2 * 2));
 }
 
 void *playThreadCallBack(void *data) {
@@ -21,6 +22,11 @@ void openSLESBufferQueueCallBack(SLAndroidSimpleBufferQueueItf bufferQueueItf, v
     auto *zedAudio = (ZedAudio *) context;
     if (zedAudio != nullptr) {
         int size = zedAudio->resample();
+        zedAudio->clock_time += size / (zedAudio->sample_rate * 2 * 2);
+        if (zedAudio->clock_time - zedAudio->last_time >= 0.1) {
+            zedAudio->last_time = zedAudio->clock_time;
+        }
+        zedAudio->cCallJava->callOnPlayTime(CTHREADTYPE_CHILD,zedAudio->total_duration,zedAudio->clock_time);
         //将重采样后的数据压入OpenSLES中的播放队列中
         if (size > 0) {
             (*zedAudio->androidSimpleBufferQueue)->Enqueue(zedAudio->androidSimpleBufferQueue,
@@ -153,6 +159,11 @@ int ZedAudio::resample() {
         if (FFMPEG_LOG) {
             FFLOGI("resample:resample_size is %d", resample_size);
         }
+        now_time = pAvFrame->pts * av_q2d(audio_time_base);
+        if (now_time < clock_time) {
+            now_time = clock_time;
+        }
+        clock_time = now_time;
         releaseTempSource();
         break;
     }

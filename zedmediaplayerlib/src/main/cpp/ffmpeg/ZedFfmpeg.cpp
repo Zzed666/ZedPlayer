@@ -39,7 +39,8 @@ void ZedFfmpeg::prepareMedia(const char *mediaPath) {
     for (int i = 0; i < pFormatCtx->nb_streams; i++) {
         if (pFormatCtx->streams[i]->codecpar->codec_type == AVMEDIA_TYPE_AUDIO) {
             if (zedAudio == nullptr) {
-                zedAudio = new ZedAudio(zedStatus, cCallJava);
+                zedAudio = new ZedAudio(zedStatus, cCallJava,
+                                        pFormatCtx->streams[i]->codecpar->sample_rate);
             }
             foundAudioStream = true;
             zedAudio->audio_index = i;
@@ -55,7 +56,8 @@ void ZedFfmpeg::prepareMedia(const char *mediaPath) {
         return;
     }
     //获取解码器
-    zedAudio->pAvCodec = avcodec_find_decoder(pFormatCtx->streams[zedAudio->audio_index]->codecpar->codec_id);
+    zedAudio->pAvCodec = avcodec_find_decoder(
+            pFormatCtx->streams[zedAudio->audio_index]->codecpar->codec_id);
     if (!zedAudio->pAvCodec) {
         if (FFMPEG_LOG) {
             FFLOGE("Couldn't get codec.");
@@ -107,6 +109,9 @@ void ZedFfmpeg::startDecodeAudio() {
         if (av_read_frame(pFormatCtx, pPacket) == 0) {
             if (pPacket->stream_index == zedAudio->audio_index) {
                 zedAudio->zedQueue->putPackets(pPacket);
+                total_duration = pFormatCtx->duration / AV_TIME_BASE;
+                zedAudio->audio_time_base = pFormatCtx->streams[zedAudio->audio_index]->time_base;
+                zedAudio->total_duration = total_duration;
             } else {
                 av_packet_free(&pPacket);
                 av_free(pPacket);
@@ -163,12 +168,12 @@ void ZedFfmpeg::stopAudio() {
 }
 
 void ZedFfmpeg::release() {
-    if(zedAudio != nullptr){
+    if (zedAudio != nullptr) {
         zedAudio->release();
-        delete(zedAudio);
+        delete (zedAudio);
         zedAudio = nullptr;
     }
-    if(pFormatCtx != nullptr){
+    if (pFormatCtx != nullptr) {
         avformat_close_input(&pFormatCtx);
         avformat_free_context(pFormatCtx);
         pFormatCtx = nullptr;

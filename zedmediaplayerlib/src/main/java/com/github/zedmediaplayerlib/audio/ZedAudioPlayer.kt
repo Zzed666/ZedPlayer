@@ -1,15 +1,13 @@
 package com.github.zedmediaplayerlib.audio
 
-import com.github.zedmediaplayerlib.audio.listener.OnLoadListener
-import com.github.zedmediaplayerlib.audio.listener.OnPauseListener
-import com.github.zedmediaplayerlib.audio.listener.OnPreparedListener
-import com.github.zedmediaplayerlib.audio.listener.OnStopListener
+import com.github.zedmediaplayerlib.audio.listener.*
 
 class ZedAudioPlayer {
     private var onLoadListener: OnLoadListener? = null
     private var onPreparedListener: OnPreparedListener? = null
     private var onPauseListener: OnPauseListener? = null
     private var onStopListener: OnStopListener? = null
+    private var onPlayTimeListener: OnPlayTimeListener? = null
 
     companion object {
         init {
@@ -85,4 +83,14 @@ class ZedAudioPlayer {
         onStopListener?.onStop()
     }
     /**-------------------------------------------stop---------------------------------------*/
+
+    /**-------------------------------------------play time---------------------------------------*/
+    fun setOnPlayTimeListener(onPlayTimeListener: OnPlayTimeListener) {
+        this.onPlayTimeListener = onPlayTimeListener
+    }
+
+    fun cCallPlayTimeBack(totalTime: Int, currentTime: Int) {
+        onPlayTimeListener?.onPlayTime(totalTime, currentTime)
+    }
+    /**-------------------------------------------play time---------------------------------------*/
 }

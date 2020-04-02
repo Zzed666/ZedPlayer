@@ -12,7 +12,13 @@
 class ZedAudio {
 public:
     int audio_index = -1;
+    int sample_rate = -1;
+    int total_duration = 0;
+    double last_time = 0;
+    double now_time = 0;
+    double clock_time = 0;
     uint8_t *out_buffer;
+    AVRational audio_time_base;
 
     AVCodec *pAvCodec = nullptr;
     AVCodecContext *pAvCodecCtx = nullptr;
@@ -35,7 +41,7 @@ public:
 
     pthread_t play_thread;
 public:
-    ZedAudio(ZedStatus *zedStatus,CCallJava *cCallJava);
+    ZedAudio(ZedStatus *zedStatus, CCallJava *cCallJava, int sample_rate);
     ~ZedAudio();
     void prepareOpenSELS();
     int resample();

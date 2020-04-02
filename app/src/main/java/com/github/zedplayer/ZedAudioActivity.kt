@@ -1,13 +1,12 @@
 package com.github.zedplayer
 
+import android.annotation.SuppressLint
 import android.os.*
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import com.github.zedmediaplayerlib.audio.ZedAudioPlayer
-import com.github.zedmediaplayerlib.audio.listener.OnLoadListener
-import com.github.zedmediaplayerlib.audio.listener.OnPauseListener
-import com.github.zedmediaplayerlib.audio.listener.OnPreparedListener
-import com.github.zedmediaplayerlib.audio.listener.OnStopListener
+import com.github.zedmediaplayerlib.audio.listener.*
+import com.github.zedmediaplayerlib.commons.ZedTimeUtil
 import kotlinx.android.synthetic.main.activity_zed_audio.*
 import java.io.File
 
@@ -43,6 +42,24 @@ class ZedAudioActivity : AppCompatActivity() {
         zedAudioPlayer.setOnStopListener(object : OnStopListener {
             override fun onStop() {
                 Log.i("zzed", "media is stopped!")
+            }
+        })
+        zedAudioPlayer.setOnPlayTimeListener(object : OnPlayTimeListener {
+            @SuppressLint("SetTextI18n")
+            override fun onPlayTime(totalTime: Int, currentTime: Int) {
+                Log.i(
+                    "zzed",
+                    "${ZedTimeUtil.secdsToDateFormat(
+                        totalTime,
+                        totalTime
+                    )}/${ZedTimeUtil.secdsToDateFormat(currentTime, totalTime)}"
+                )
+                runOnUiThread(Runnable {
+                    play_time.text = "${ZedTimeUtil.secdsToDateFormat(
+                        totalTime,
+                        totalTime
+                    )}/${ZedTimeUtil.secdsToDateFormat(currentTime, totalTime)}"
+                })
             }
         })
         prepare.setOnClickListener {

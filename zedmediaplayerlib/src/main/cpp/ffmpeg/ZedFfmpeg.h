@@ -15,6 +15,7 @@ public:
     AVFormatContext *pFormatCtx = nullptr;
     bool foundAudioStream = false;
     bool ffmpeg_load_exit = false;
+    int total_duration = 0;
 
     CCallJava *cCallJava = nullptr;
     ZedAudio *zedAudio = nullptr;

@@ -18,6 +18,7 @@ CCallJava::CCallJava(JavaVM *vm, JNIEnv *env, jobject obj) {
     }
     jloadmid = jEnv->GetMethodID(claz, "cCallLoadBack", "(Z)V");
     jpreparemid = jEnv->GetMethodID(claz, "cCallPreparedBack", "()V");
+    jplaytimemid = jEnv->GetMethodID(claz, "cCallPlayTimeBack", "(II)V");
     jpausemid = jEnv->GetMethodID(claz, "cCallPauseBack", "(Z)V");
     jstopmid = jEnv->GetMethodID(claz, "cCallStopBack", "()V");
 }
@@ -28,7 +29,7 @@ CCallJava::~CCallJava() {
 
 void CCallJava::callOnLoad(int cType, bool load) {
     if (cType == CTHREADTYPE_MAIN) {
-        jEnv->CallVoidMethod(jobj, jloadmid,load);
+        jEnv->CallVoidMethod(jobj, jloadmid, load);
     } else if (cType == CTHREADTYPE_CHILD) {
         JNIEnv *jniEnv;
         bool isAttached = false;
@@ -38,7 +39,7 @@ void CCallJava::callOnLoad(int cType, bool load) {
             }
             isAttached = true;
         }
-        jniEnv->CallVoidMethod(jobj, jloadmid,load);
+        jniEnv->CallVoidMethod(jobj, jloadmid, load);
         if (isAttached) {
             jvm->DetachCurrentThread();
         }
@@ -64,9 +65,9 @@ void CCallJava::callOnPrepare(int cType) {
     }
 }
 
-void CCallJava::callOnPause(int cType, bool pause) {
+void CCallJava::callOnPlayTime(int cType, int total, int current) {
     if (cType == CTHREADTYPE_MAIN) {
-        jEnv->CallVoidMethod(jobj, jpausemid,pause);
+        jEnv->CallVoidMethod(jobj, jplaytimemid, total, current);
     } else if (cType == CTHREADTYPE_CHILD) {
         JNIEnv *jniEnv;
         bool isAttached = false;
@@ -76,7 +77,26 @@ void CCallJava::callOnPause(int cType, bool pause) {
             }
             isAttached = true;
         }
-        jniEnv->CallVoidMethod(jobj, jpausemid,pause);
+        jniEnv->CallVoidMethod(jobj, jplaytimemid, total, current);
+        if (isAttached) {
+            jvm->DetachCurrentThread();
+        }
+    }
+}
+
+void CCallJava::callOnPause(int cType, bool pause) {
+    if (cType == CTHREADTYPE_MAIN) {
+        jEnv->CallVoidMethod(jobj, jpausemid, pause);
+    } else if (cType == CTHREADTYPE_CHILD) {
+        JNIEnv *jniEnv;
+        bool isAttached = false;
+        if ((jvm->GetEnv((void **) &jniEnv, JNI_VERSION_1_6)) < 0) {
+            if (jvm->AttachCurrentThread(&jniEnv, 0)) {
+                return;
+            }
+            isAttached = true;
+        }
+        jniEnv->CallVoidMethod(jobj, jpausemid, pause);
         if (isAttached) {
             jvm->DetachCurrentThread();
         }
