@@ -8,6 +8,7 @@
 
 class ZedStatus {
 public:
+    bool load;
     bool exit;
 public:
     ZedStatus();

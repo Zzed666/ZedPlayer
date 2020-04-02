@@ -15,11 +15,13 @@ public:
     AVFormatContext *pFormatCtx = nullptr;
     AVCodec *pCodec = nullptr;
     bool foundAudioStream = false;
+    bool ffmpeg_load_exit = false;
 
     CCallJava *cCallJava = nullptr;
     ZedAudio *zedAudio = nullptr;
     ZedStatus *zedStatus = nullptr;
 
+    pthread_mutex_t load_thread_mutex;
 public:
     ZedFfmpeg(ZedStatus *zedStatus,CCallJava *cCallJava);
     ~ZedFfmpeg();

@@ -5,6 +5,7 @@
 #include "ZedStatus.h"
 
 ZedStatus::ZedStatus() {
+    load = true;
     exit = false;
 }
 

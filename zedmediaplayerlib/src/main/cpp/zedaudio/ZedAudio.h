@@ -7,6 +7,7 @@
 
 #include "../queues/ZedQueue.h"
 #include "../status/ZedStatus.h"
+#include "../cjava/CCallJava.h"
 
 class ZedAudio {
 public:
@@ -29,10 +30,11 @@ public:
 
     ZedQueue *zedQueue = nullptr;
     ZedStatus *zedStatus = nullptr;
+    CCallJava *cCallJava = nullptr;
 
     pthread_t play_thread;
 public:
-    ZedAudio(ZedStatus *zedStatus);
+    ZedAudio(ZedStatus *zedStatus,CCallJava *cCallJava);
     ~ZedAudio();
     void play();
     void prepareOpenSELS();

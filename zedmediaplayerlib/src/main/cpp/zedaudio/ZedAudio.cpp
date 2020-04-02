@@ -4,8 +4,9 @@
 
 #include "ZedAudio.h"
 
-ZedAudio::ZedAudio(ZedStatus *zedStatus) {
+ZedAudio::ZedAudio(ZedStatus *zedStatus,CCallJava *cCallJava) {
     this->zedStatus = zedStatus;
+    this->cCallJava = cCallJava;
     zedQueue = new ZedQueue(zedStatus);
     out_buffer = (uint8_t *) (av_malloc(44100 * 2 * 2));
 }
@@ -61,7 +62,8 @@ void ZedAudio::prepareOpenSELS() {
             SL_SPEAKER_FRONT_LEFT | SL_SPEAKER_FRONT_RIGHT,
             SL_BYTEORDER_LITTLEENDIAN
     };
-    SLDataLocator_AndroidSimpleBufferQueue bufferQueue = {SL_DATALOCATOR_ANDROIDSIMPLEBUFFERQUEUE, 2};
+    SLDataLocator_AndroidSimpleBufferQueue bufferQueue = {SL_DATALOCATOR_ANDROIDSIMPLEBUFFERQUEUE,
+                                                          2};
     SLDataLocator_OutputMix outputMix = {SL_DATALOCATOR_OUTPUTMIX, mixoutObj};
     SLDataSource pAudioSrc = {&bufferQueue, &dataFormatPcm};
     SLDataSink pAudioSnk = {&outputMix, 0};
@@ -90,6 +92,18 @@ int ZedAudio::resample() {
     int ret = -1;
     int resample_size = 0;
     while (zedStatus != nullptr && !zedStatus->exit) {
+        if (zedQueue->getPacketSize() == 0) {
+            if (!zedStatus->load) {
+                zedStatus->load = true;
+                cCallJava->callOnLoad(CTHREADTYPE_CHILD,true);
+            }
+            continue;
+        } else {
+            if (zedStatus->load) {
+                zedStatus->load = false;
+                cCallJava->callOnLoad(CTHREADTYPE_CHILD, false);
+            }
+        }
         pAvPacket = av_packet_alloc();
         if (zedQueue->getPackets(pAvPacket) != 0) {
             releaseTempSource();

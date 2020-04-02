@@ -7,9 +7,12 @@
 ZedFfmpeg::ZedFfmpeg(ZedStatus *zedStatus, CCallJava *cCallJava) {
     this->zedStatus = zedStatus;
     this->cCallJava = cCallJava;
+    pthread_mutex_init(&load_thread_mutex, nullptr);
 }
 
 void ZedFfmpeg::prepareMedia(const char *mediaPath) {
+    cCallJava->callOnLoad(CTHREADTYPE_CHILD,true);
+    pthread_mutex_lock(&load_thread_mutex);
     //初始化网络
     avformat_network_init();
     //初始化avformatcontext分配空间
@@ -19,6 +22,8 @@ void ZedFfmpeg::prepareMedia(const char *mediaPath) {
         if (FFMPEG_LOG) {
             FFLOGE("Cloudn't open the media:%s", mediaPath);
         }
+        ffmpeg_load_exit = true;
+        pthread_mutex_unlock(&load_thread_mutex);
         return;
     }
     //获取流
@@ -26,13 +31,15 @@ void ZedFfmpeg::prepareMedia(const char *mediaPath) {
         if (FFMPEG_LOG) {
             FFLOGE("Cloudn't get the media stream.");
         }
+        ffmpeg_load_exit = true;
+        pthread_mutex_unlock(&load_thread_mutex);
         return;
     }
     //循环遍历流
     for (int i = 0; i < pFormatCtx->nb_streams; i++) {
         if (pFormatCtx->streams[i]->codecpar->codec_type == AVMEDIA_TYPE_AUDIO) {
             if (zedAudio == nullptr) {
-                zedAudio = new ZedAudio(zedStatus);
+                zedAudio = new ZedAudio(zedStatus,cCallJava);
             }
             foundAudioStream = true;
             zedAudio->audio_index = i;
@@ -43,6 +50,8 @@ void ZedFfmpeg::prepareMedia(const char *mediaPath) {
         if (FFMPEG_LOG) {
             FFLOGE("Couldn't find audio.");
         }
+        ffmpeg_load_exit = true;
+        pthread_mutex_unlock(&load_thread_mutex);
         return;
     }
     //获取解码器
@@ -51,6 +60,8 @@ void ZedFfmpeg::prepareMedia(const char *mediaPath) {
         if (FFMPEG_LOG) {
             FFLOGE("Couldn't get codec.");
         }
+        ffmpeg_load_exit = true;
+        pthread_mutex_unlock(&load_thread_mutex);
         return;
     }
     //分配空间给解码器上下文
@@ -59,6 +70,8 @@ void ZedFfmpeg::prepareMedia(const char *mediaPath) {
         if (FFMPEG_LOG) {
             FFLOGE("Couldn't alloc codecCtx.");
         }
+        ffmpeg_load_exit = true;
+        pthread_mutex_unlock(&load_thread_mutex);
         return;
     }
     //给解码器上下文赋值参数
@@ -67,6 +80,8 @@ void ZedFfmpeg::prepareMedia(const char *mediaPath) {
         if (FFMPEG_LOG) {
             FFLOGE("Couldn't params to codecCtx.");
         }
+        ffmpeg_load_exit = true;
+        pthread_mutex_unlock(&load_thread_mutex);
         return;
     }
     //打开解码器
@@ -74,9 +89,13 @@ void ZedFfmpeg::prepareMedia(const char *mediaPath) {
         if (FFMPEG_LOG) {
             FFLOGE("Couldn't open codec.");
         }
+        ffmpeg_load_exit = true;
+        pthread_mutex_unlock(&load_thread_mutex);
         return;
     }
     cCallJava->callOnPrepare(CTHREADTYPE_CHILD);
+    ffmpeg_load_exit = true;
+    pthread_mutex_unlock(&load_thread_mutex);
     startDecodeAudio();
 }
 
@@ -117,5 +136,5 @@ void ZedFfmpeg::startDecodeAudio() {
 }
 
 ZedFfmpeg::~ZedFfmpeg() {
-
+    pthread_mutex_destroy(&load_thread_mutex);
 }

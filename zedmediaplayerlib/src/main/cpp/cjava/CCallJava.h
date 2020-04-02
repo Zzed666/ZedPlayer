@@ -18,10 +18,12 @@ public:
     JavaVM *jvm = nullptr;
     JNIEnv *jEnv = nullptr;
     jobject jobj = nullptr;
+    jmethodID jloadmid = nullptr;
     jmethodID jpreparemid = nullptr;
 public:
     CCallJava(JavaVM *vm,JNIEnv *env,jobject obj);
     ~CCallJava();
+    void callOnLoad(int cType, bool load);
     void callOnPrepare(int cType);
 };
 
