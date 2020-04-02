@@ -20,7 +20,7 @@ void ZedQueue::putPackets(AVPacket *avPacket) {
     pthread_mutex_unlock(&decode_thread_mutex);
 }
 
-void ZedQueue::getPackets(AVPacket *avPacket) {
+int ZedQueue::getPackets(AVPacket *avPacket) {
     pthread_mutex_lock(&decode_thread_mutex);
     while (zedStatus != nullptr && !zedStatus->exit) {
         if (!zedQueue.empty()) {
@@ -45,6 +45,7 @@ void ZedQueue::getPackets(AVPacket *avPacket) {
         }
     }
     pthread_mutex_unlock(&decode_thread_mutex);
+    return 0;
 }
 
 int ZedQueue::getPacketSize() {

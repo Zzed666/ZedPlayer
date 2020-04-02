@@ -21,7 +21,7 @@ public:
     ZedQueue(ZedStatus *zedStatus);
     ~ZedQueue();
     void putPackets(AVPacket *avPacket);
-    void getPackets(AVPacket *avPacket);
+    int getPackets(AVPacket *avPacket);
     int getPacketSize();
 };
 

@@ -14,7 +14,6 @@ class ZedFfmpeg {
 public:
     AVFormatContext *pFormatCtx = nullptr;
     AVCodec *pCodec = nullptr;
-    AVCodecContext *pCodecCtx = nullptr;
     bool foundAudioStream = false;
 
     CCallJava *cCallJava = nullptr;

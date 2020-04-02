@@ -54,15 +54,15 @@ void ZedFfmpeg::prepareMedia(const char *mediaPath) {
         return;
     }
     //分配空间给解码器上下文
-    pCodecCtx = avcodec_alloc_context3(pCodec);
-    if (!pCodecCtx) {
+    zedAudio->pAvCodecCtx = avcodec_alloc_context3(pCodec);
+    if (!zedAudio->pAvCodecCtx) {
         if (FFMPEG_LOG) {
             FFLOGE("Couldn't alloc codecCtx.");
         }
         return;
     }
     //给解码器上下文赋值参数
-    if (avcodec_parameters_to_context(pCodecCtx,
+    if (avcodec_parameters_to_context(zedAudio->pAvCodecCtx,
                                       pFormatCtx->streams[zedAudio->audio_index]->codecpar) < 0) {
         if (FFMPEG_LOG) {
             FFLOGE("Couldn't params to codecCtx.");
@@ -70,7 +70,7 @@ void ZedFfmpeg::prepareMedia(const char *mediaPath) {
         return;
     }
     //打开解码器
-    if (avcodec_open2(pCodecCtx, pCodec, nullptr) != 0) {
+    if (avcodec_open2(zedAudio->pAvCodecCtx, pCodec, nullptr) != 0) {
         if (FFMPEG_LOG) {
             FFLOGE("Couldn't open codec.");
         }
@@ -81,7 +81,7 @@ void ZedFfmpeg::prepareMedia(const char *mediaPath) {
 }
 
 void ZedFfmpeg::start() {
-    int count = 0;
+    zedAudio->play();
     while (zedStatus != nullptr && !zedStatus->exit) {
         //读取数据到AVPacket
         AVPacket *pPacket = av_packet_alloc();
@@ -106,15 +106,6 @@ void ZedFfmpeg::start() {
 
     if (FFMPEG_LOG) {
         FFLOGI("解码完成");
-    }
-
-    while (zedAudio->zedQueue->getPacketSize() > 0){
-        AVPacket *pPacket = nullptr;
-        pPacket = av_packet_alloc();
-        zedAudio->zedQueue->getPackets(pPacket);
-        av_packet_free(&pPacket);
-        av_free(pPacket);
-        pPacket = nullptr;
     }
 
 }
