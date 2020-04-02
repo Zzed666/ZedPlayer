@@ -18,6 +18,15 @@ public:
     AVFrame *pAvFrame = nullptr;
     SwrContext *pSwrCtx = nullptr;
 
+    SLObjectItf engineObj = nullptr;
+    SLObjectItf mixoutObj = nullptr;
+    SLObjectItf playObj = nullptr;
+
+    SLEngineItf engineEngine = nullptr;
+    SLEnvironmentalReverbItf mixoutEnvironmentalReverb = nullptr;
+    SLPlayItf playPlay = nullptr;
+    SLAndroidSimpleBufferQueueItf androidSimpleBufferQueue = nullptr;
+
     ZedQueue *zedQueue = nullptr;
     ZedStatus *zedStatus = nullptr;
 
@@ -26,6 +35,7 @@ public:
     ZedAudio(ZedStatus *zedStatus);
     ~ZedAudio();
     void play();
+    void prepareOpenSELS();
     int resample();
     void releaseTempSource();
 };

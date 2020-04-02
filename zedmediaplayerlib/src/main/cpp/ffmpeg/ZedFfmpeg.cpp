@@ -31,7 +31,7 @@ void ZedFfmpeg::prepareMedia(const char *mediaPath) {
     //循环遍历流
     for (int i = 0; i < pFormatCtx->nb_streams; i++) {
         if (pFormatCtx->streams[i]->codecpar->codec_type == AVMEDIA_TYPE_AUDIO) {
-            if(zedAudio == nullptr){
+            if (zedAudio == nullptr) {
                 zedAudio = new ZedAudio(zedStatus);
             }
             foundAudioStream = true;
@@ -77,18 +77,18 @@ void ZedFfmpeg::prepareMedia(const char *mediaPath) {
         return;
     }
     cCallJava->callOnPrepare(CTHREADTYPE_CHILD);
-    start();
+    startDecodeAudio();
 }
 
-void ZedFfmpeg::start() {
+void ZedFfmpeg::startDecodeAudio() {
     zedAudio->play();
     while (zedStatus != nullptr && !zedStatus->exit) {
         //读取数据到AVPacket
         AVPacket *pPacket = av_packet_alloc();
         if (av_read_frame(pFormatCtx, pPacket) == 0) {
-            if(pPacket->stream_index == zedAudio->audio_index){
+            if (pPacket->stream_index == zedAudio->audio_index) {
                 zedAudio->zedQueue->putPackets(pPacket);
-            } else{
+            } else {
                 av_packet_free(&pPacket);
                 av_free(pPacket);
                 pPacket = nullptr;
@@ -100,6 +100,12 @@ void ZedFfmpeg::start() {
             av_packet_free(&pPacket);
             av_free(pPacket);
             pPacket = nullptr;
+            while (zedStatus != nullptr && !zedStatus->exit) {
+                if (zedAudio->zedQueue->getPacketSize() == 0) {
+                    zedStatus->exit = true;
+                    break;
+                } else continue;
+            }
             break;
         }
     }

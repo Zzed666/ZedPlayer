@@ -11,13 +11,79 @@ ZedAudio::ZedAudio(ZedStatus *zedStatus) {
 }
 
 void *playThreadCallBack(void *data) {
-    auto *zedAuzio = (ZedAudio *) data;
-    zedAuzio->resample();
-    pthread_exit(&zedAuzio->play_thread);
+    auto *zedAudio = (ZedAudio *) data;
+    zedAudio->prepareOpenSELS();
+    pthread_exit(&zedAudio->play_thread);
+}
+
+void openSLESBufferQueueCallBack(SLAndroidSimpleBufferQueueItf bufferQueueItf, void *context) {
+    auto *zedAudio = (ZedAudio *) context;
+    if (zedAudio != nullptr) {
+        int size = zedAudio->resample();
+        //将重采样后的数据压入OpenSLES中的播放队列中
+        if (size > 0) {
+            (*zedAudio->androidSimpleBufferQueue)->Enqueue(zedAudio->androidSimpleBufferQueue,
+                                                           zedAudio->out_buffer,
+                                                           size);
+        }
+    }
 }
 
 void ZedAudio::play() {
     pthread_create(&play_thread, nullptr, playThreadCallBack, this);
+}
+
+void ZedAudio::prepareOpenSELS() {
+    //创建引擎
+    slCreateEngine(&engineObj, 0, 0, 0, 0, 0);
+    (*engineObj)->Realize(engineObj, SL_BOOLEAN_FALSE);
+    (*engineObj)->GetInterface(engineObj, SL_IID_ENGINE, &engineEngine);
+    //创建混音器
+    const SLInterfaceID mixoutItfs[1] = {SL_IID_ENVIRONMENTALREVERB};
+    const SLboolean mixoutBools[1] = {SL_BOOLEAN_FALSE};
+    (*engineEngine)->CreateOutputMix(engineEngine,
+                                     &mixoutObj,
+                                     1,
+                                     mixoutItfs,
+                                     mixoutBools);
+    (*mixoutObj)->Realize(mixoutObj, SL_BOOLEAN_FALSE);
+    (*mixoutObj)->GetInterface(mixoutObj, SL_IID_ENVIRONMENTALREVERB, &mixoutEnvironmentalReverb);
+    const SLEnvironmentalReverbSettings pProperties = SL_I3DL2_ENVIRONMENT_PRESET_STONECORRIDOR;
+    (*mixoutEnvironmentalReverb)->SetEnvironmentalReverbProperties(mixoutEnvironmentalReverb,
+                                                                   &pProperties);
+    //创建播放器
+    SLDataFormat_PCM dataFormatPcm = {
+            SL_DATAFORMAT_PCM,
+            2,
+            SL_SAMPLINGRATE_44_1,
+            SL_PCMSAMPLEFORMAT_FIXED_16,
+            SL_PCMSAMPLEFORMAT_FIXED_16,
+            SL_SPEAKER_FRONT_LEFT | SL_SPEAKER_FRONT_RIGHT,
+            SL_BYTEORDER_LITTLEENDIAN
+    };
+    SLDataLocator_AndroidSimpleBufferQueue bufferQueue = {SL_DATALOCATOR_ANDROIDSIMPLEBUFFERQUEUE, 2};
+    SLDataLocator_OutputMix outputMix = {SL_DATALOCATOR_OUTPUTMIX, mixoutObj};
+    SLDataSource pAudioSrc = {&bufferQueue, &dataFormatPcm};
+    SLDataSink pAudioSnk = {&outputMix, 0};
+    const SLInterfaceID playItfs[1] = {SL_IID_BUFFERQUEUE};
+    const SLboolean playBools[1] = {SL_BOOLEAN_TRUE};
+    (*engineEngine)->CreateAudioPlayer(engineEngine,
+                                       &playObj,
+                                       &pAudioSrc,
+                                       &pAudioSnk,
+                                       1,
+                                       playItfs,
+                                       playBools);
+    (*playObj)->Realize(playObj, SL_BOOLEAN_FALSE);
+    (*playObj)->GetInterface(playObj, SL_IID_PLAY, &playPlay);
+    //设置缓冲队列和回调函数
+    (*playObj)->GetInterface(playObj, SL_IID_BUFFERQUEUE, &androidSimpleBufferQueue);
+    (*androidSimpleBufferQueue)->RegisterCallback(androidSimpleBufferQueue,
+                                                  &openSLESBufferQueueCallBack, this);
+    //设置播放状态
+    (*playPlay)->SetPlayState(playPlay, SL_PLAYSTATE_PLAYING);
+    //启用回调函数
+    openSLESBufferQueueCallBack(androidSimpleBufferQueue, this);
 }
 
 int ZedAudio::resample() {
@@ -67,11 +133,11 @@ int ZedAudio::resample() {
             continue;
         }
         int nbs = swr_convert(pSwrCtx, &out_buffer, pAvFrame->nb_samples,
-                    (const uint8_t **) (pAvFrame->data), pAvFrame->nb_samples);
+                              (const uint8_t **) (pAvFrame->data), pAvFrame->nb_samples);
         int channels = av_get_channel_layout_nb_channels(AV_CH_LAYOUT_STEREO);
         resample_size = nbs * channels * av_get_bytes_per_sample(AV_SAMPLE_FMT_S16);
         if (FFMPEG_LOG) {
-            FFLOGI("resample:resample_size is %d",resample_size);
+            FFLOGI("resample:resample_size is %d", resample_size);
         }
         releaseTempSource();
         break;
