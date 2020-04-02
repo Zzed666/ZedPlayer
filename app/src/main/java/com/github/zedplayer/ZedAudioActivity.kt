@@ -5,6 +5,7 @@ import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import com.github.zedmediaplayerlib.audio.ZedAudioPlayer
 import com.github.zedmediaplayerlib.audio.listener.OnLoadListener
+import com.github.zedmediaplayerlib.audio.listener.OnPauseListener
 import com.github.zedmediaplayerlib.audio.listener.OnPreparedListener
 import kotlinx.android.synthetic.main.activity_zed_audio.*
 import java.io.File
@@ -31,6 +32,13 @@ class ZedAudioActivity : AppCompatActivity() {
                 Log.i("zzed", "media is prepared to play")
             }
         })
+        zedAudioPlayer.setOnPauseListener(object : OnPauseListener {
+            override fun onPause(pause: Boolean) {
+                if (pause) {
+                    Log.i("zzed", "media is paused...")
+                } else Log.i("zzed", "media is resume playing...")
+            }
+        })
         prepare.setOnClickListener {
             zedAudioPlayer.prepared(
                 File(
@@ -38,6 +46,12 @@ class ZedAudioActivity : AppCompatActivity() {
                     "Yasuo.mp3"
                 ).absolutePath
             )
+        }
+        pause.setOnClickListener {
+            zedAudioPlayer.pause(true)
+        }
+        resume.setOnClickListener {
+            zedAudioPlayer.pause(false)
         }
     }
 }

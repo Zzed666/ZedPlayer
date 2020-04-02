@@ -36,9 +36,11 @@ public:
 public:
     ZedAudio(ZedStatus *zedStatus,CCallJava *cCallJava);
     ~ZedAudio();
-    void play();
     void prepareOpenSELS();
     int resample();
+    void play();
+    void pause(bool is_pause);
+    void stop();
     void releaseTempSource();
 };
 

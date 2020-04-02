@@ -20,11 +20,13 @@ public:
     jobject jobj = nullptr;
     jmethodID jloadmid = nullptr;
     jmethodID jpreparemid = nullptr;
+    jmethodID jpausemid = nullptr;
 public:
-    CCallJava(JavaVM *vm,JNIEnv *env,jobject obj);
+    CCallJava(JavaVM *vm, JNIEnv *env, jobject obj);
     ~CCallJava();
     void callOnLoad(int cType, bool load);
     void callOnPrepare(int cType);
+    void callOnPause(int cType, bool pause);
 };
 
 

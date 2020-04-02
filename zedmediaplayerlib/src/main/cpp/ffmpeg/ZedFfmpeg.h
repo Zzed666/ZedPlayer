@@ -27,6 +27,7 @@ public:
     ~ZedFfmpeg();
     void prepareMedia(const char* mediaPath);
     void startDecodeAudio();
+    void pauseAudio(bool pause);
 };
 
 

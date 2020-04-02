@@ -4,7 +4,7 @@
 
 #include "ZedAudio.h"
 
-ZedAudio::ZedAudio(ZedStatus *zedStatus,CCallJava *cCallJava) {
+ZedAudio::ZedAudio(ZedStatus *zedStatus, CCallJava *cCallJava) {
     this->zedStatus = zedStatus;
     this->cCallJava = cCallJava;
     zedQueue = new ZedQueue(zedStatus);
@@ -95,7 +95,7 @@ int ZedAudio::resample() {
         if (zedQueue->getPacketSize() == 0) {
             if (!zedStatus->load) {
                 zedStatus->load = true;
-                cCallJava->callOnLoad(CTHREADTYPE_CHILD,true);
+                cCallJava->callOnLoad(CTHREADTYPE_CHILD, true);
             }
             continue;
         } else {
@@ -157,6 +157,24 @@ int ZedAudio::resample() {
         break;
     }
     return resample_size;
+}
+
+void ZedAudio::pause(bool is_pause) {
+    if (is_pause) {
+        if (playPlay != nullptr) {
+            (*playPlay)->SetPlayState(playPlay, SL_PLAYSTATE_PAUSED);
+            cCallJava->callOnPause(CTHREADTYPE_CHILD, true);
+        }
+    } else {
+        if (playPlay != nullptr) {
+            (*playPlay)->SetPlayState(playPlay, SL_PLAYSTATE_PLAYING);
+            cCallJava->callOnPause(CTHREADTYPE_CHILD, false);
+        }
+    }
+}
+
+void ZedAudio::stop() {
+
 }
 
 void ZedAudio::releaseTempSource() {

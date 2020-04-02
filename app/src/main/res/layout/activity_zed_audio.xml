@@ -15,5 +15,25 @@
         app:layout_constraintTop_toTopOf="parent"
         android:layout_marginTop="20dp"/>
 
+    <Button
+        android:id="@+id/pause"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Pause"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/prepare"
+        android:layout_marginTop="20dp"/>
+
+    <Button
+        android:id="@+id/resume"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Resume"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/pause"
+        android:layout_marginTop="20dp"/>
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

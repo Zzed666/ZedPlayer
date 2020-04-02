@@ -135,6 +135,10 @@ void ZedFfmpeg::startDecodeAudio() {
 
 }
 
+void ZedFfmpeg::pauseAudio(bool is_pause) {
+    zedAudio->pause(is_pause);
+}
+
 ZedFfmpeg::~ZedFfmpeg() {
     pthread_mutex_destroy(&load_thread_mutex);
 }

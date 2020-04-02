@@ -38,12 +38,21 @@ Java_com_github_zedmediaplayerlib_audio_ZedAudioPlayer_n_1prepared(JNIEnv *env,
     if (cCallJava == nullptr) {
         cCallJava = new CCallJava(javaVm, env, obj);
     }
-    if(zedStatus == nullptr){
+    if (zedStatus == nullptr) {
         zedStatus = new ZedStatus();
     }
     if (zedFfmpeg == nullptr) {
-        zedFfmpeg = new ZedFfmpeg(zedStatus,cCallJava);
+        zedFfmpeg = new ZedFfmpeg(zedStatus, cCallJava);
     }
     zedFfmpeg->prepareMedia(mediaPath);
     env->ReleaseStringUTFChars(mediaPath_, mediaPath);
+}
+
+extern "C" JNIEXPORT void JNICALL
+Java_com_github_zedmediaplayerlib_audio_ZedAudioPlayer_n_1pause(JNIEnv *env,
+                                                                jobject obj,
+                                                                jboolean is_pause) {
+    if (zedFfmpeg != nullptr) {
+        zedFfmpeg->pauseAudio(is_pause);
+    }
 }
