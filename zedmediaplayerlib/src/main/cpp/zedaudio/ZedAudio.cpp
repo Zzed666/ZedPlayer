@@ -174,7 +174,9 @@ void ZedAudio::pause(bool is_pause) {
 }
 
 void ZedAudio::stop() {
-
+    if (playPlay != nullptr) {
+        (*playPlay)->SetPlayState(playPlay, SL_PLAYSTATE_STOPPED);
+    }
 }
 
 void ZedAudio::releaseTempSource() {
@@ -192,6 +194,44 @@ void ZedAudio::releaseTempSource() {
         swr_free(&pSwrCtx);
         av_free(pSwrCtx);
         pSwrCtx = nullptr;
+    }
+}
+
+void ZedAudio::release() {
+    if (zedQueue != nullptr) {
+        delete (zedQueue);
+        zedQueue = nullptr;
+    }
+    if (playObj != nullptr) {
+        (*playObj)->Destroy(playObj);
+        playObj = nullptr;
+        playPlay = nullptr;
+        androidSimpleBufferQueue = nullptr;
+    }
+    if (mixoutObj != nullptr) {
+        (*mixoutObj)->Destroy(mixoutObj);
+        mixoutObj = nullptr;
+        mixoutEnvironmentalReverb = nullptr;
+    }
+    if (engineObj != nullptr) {
+        (*engineObj)->Destroy(engineObj);
+        engineObj = nullptr;
+        engineEngine = nullptr;
+    }
+    if (out_buffer != nullptr) {
+        free(out_buffer);
+        out_buffer = nullptr;
+    }
+    if (pAvCodecCtx != nullptr) {
+        avcodec_close(pAvCodecCtx);
+        avcodec_free_context(&pAvCodecCtx);
+        pAvCodecCtx = nullptr;
+    }
+    if (zedStatus != nullptr) {
+        zedStatus = nullptr;
+    }
+    if (cCallJava != nullptr) {
+        cCallJava = nullptr;
     }
 }
 

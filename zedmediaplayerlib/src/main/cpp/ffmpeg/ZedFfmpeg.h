@@ -13,7 +13,6 @@
 class ZedFfmpeg {
 public:
     AVFormatContext *pFormatCtx = nullptr;
-    AVCodec *pCodec = nullptr;
     bool foundAudioStream = false;
     bool ffmpeg_load_exit = false;
 
@@ -28,6 +27,8 @@ public:
     void prepareMedia(const char* mediaPath);
     void startDecodeAudio();
     void pauseAudio(bool pause);
+    void stopAudio();
+    void release();
 };
 
 

@@ -3,11 +3,13 @@ package com.github.zedmediaplayerlib.audio
 import com.github.zedmediaplayerlib.audio.listener.OnLoadListener
 import com.github.zedmediaplayerlib.audio.listener.OnPauseListener
 import com.github.zedmediaplayerlib.audio.listener.OnPreparedListener
+import com.github.zedmediaplayerlib.audio.listener.OnStopListener
 
 class ZedAudioPlayer {
     private var onLoadListener: OnLoadListener? = null
     private var onPreparedListener: OnPreparedListener? = null
     private var onPauseListener: OnPauseListener? = null
+    private var onStopListener: OnStopListener? = null
 
     companion object {
         init {
@@ -24,6 +26,7 @@ class ZedAudioPlayer {
 
     private external fun n_prepared(path: String)
     private external fun n_pause(pause: Boolean)
+    private external fun n_stop()
 
     /**-------------------------------------------load---------------------------------------*/
     fun setOnLoadListener(onLoadListener: OnLoadListener) {
@@ -66,4 +69,20 @@ class ZedAudioPlayer {
         onPauseListener?.onPause(pause)
     }
     /**-------------------------------------------pause or resume---------------------------------------*/
+
+    /**-------------------------------------------stop---------------------------------------*/
+    fun setOnStopListener(onStopListener: OnStopListener) {
+        this.onStopListener = onStopListener
+    }
+
+    fun stop() {
+        Thread(Runnable {
+            n_stop()
+        }).start()
+    }
+
+    fun cCallStopBack() {
+        onStopListener?.onStop()
+    }
+    /**-------------------------------------------stop---------------------------------------*/
 }

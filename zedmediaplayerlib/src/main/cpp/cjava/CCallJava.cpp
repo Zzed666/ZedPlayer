@@ -19,6 +19,7 @@ CCallJava::CCallJava(JavaVM *vm, JNIEnv *env, jobject obj) {
     jloadmid = jEnv->GetMethodID(claz, "cCallLoadBack", "(Z)V");
     jpreparemid = jEnv->GetMethodID(claz, "cCallPreparedBack", "()V");
     jpausemid = jEnv->GetMethodID(claz, "cCallPauseBack", "(Z)V");
+    jstopmid = jEnv->GetMethodID(claz, "cCallStopBack", "()V");
 }
 
 CCallJava::~CCallJava() {
@@ -76,6 +77,25 @@ void CCallJava::callOnPause(int cType, bool pause) {
             isAttached = true;
         }
         jniEnv->CallVoidMethod(jobj, jpausemid,pause);
+        if (isAttached) {
+            jvm->DetachCurrentThread();
+        }
+    }
+}
+
+void CCallJava::callOnStop(int cType) {
+    if (cType == CTHREADTYPE_MAIN) {
+        jEnv->CallVoidMethod(jobj, jstopmid);
+    } else if (cType == CTHREADTYPE_CHILD) {
+        JNIEnv *jniEnv;
+        bool isAttached = false;
+        if ((jvm->GetEnv((void **) &jniEnv, JNI_VERSION_1_6)) < 0) {
+            if (jvm->AttachCurrentThread(&jniEnv, 0)) {
+                return;
+            }
+            isAttached = true;
+        }
+        jniEnv->CallVoidMethod(jobj, jstopmid);
         if (isAttached) {
             jvm->DetachCurrentThread();
         }

@@ -14,6 +14,8 @@ ZedFfmpeg *zedFfmpeg = nullptr;
 ZedStatus *zedStatus = nullptr;
 CCallJava *cCallJava = nullptr;
 
+bool ffmpeg_stop_complete = true;
+
 extern "C" JNIEXPORT jint JNICALL
 JNI_OnLoad(JavaVM *vm, void *reversed) {
     javaVm = vm;
@@ -35,16 +37,16 @@ Java_com_github_zedmediaplayerlib_audio_ZedAudioPlayer_n_1prepared(JNIEnv *env,
         }
         return;
     }
-    if (cCallJava == nullptr) {
-        cCallJava = new CCallJava(javaVm, env, obj);
-    }
-    if (zedStatus == nullptr) {
-        zedStatus = new ZedStatus();
-    }
     if (zedFfmpeg == nullptr) {
+        if (cCallJava == nullptr) {
+            cCallJava = new CCallJava(javaVm, env, obj);
+        }
+        if (zedStatus == nullptr) {
+            zedStatus = new ZedStatus();
+        }
         zedFfmpeg = new ZedFfmpeg(zedStatus, cCallJava);
+        zedFfmpeg->prepareMedia(mediaPath);
     }
-    zedFfmpeg->prepareMedia(mediaPath);
     env->ReleaseStringUTFChars(mediaPath_, mediaPath);
 }
 
@@ -54,5 +56,29 @@ Java_com_github_zedmediaplayerlib_audio_ZedAudioPlayer_n_1pause(JNIEnv *env,
                                                                 jboolean is_pause) {
     if (zedFfmpeg != nullptr) {
         zedFfmpeg->pauseAudio(is_pause);
+    }
+}
+
+extern "C" JNIEXPORT void JNICALL
+Java_com_github_zedmediaplayerlib_audio_ZedAudioPlayer_n_1stop(JNIEnv *env,
+                                                               jobject obj) {
+    if (zedFfmpeg != nullptr) {
+        if(!ffmpeg_stop_complete){
+            FFLOGI("ffmpeg stop is not complete")
+            return;
+        }
+        ffmpeg_stop_complete = false;
+        zedFfmpeg->stopAudio();
+        if (zedStatus != nullptr) {
+            delete (zedStatus);
+            zedStatus = nullptr;
+        }
+        if (cCallJava != nullptr) {
+            delete (cCallJava);
+            cCallJava = nullptr;
+        }
+        delete (zedFfmpeg);
+        zedFfmpeg = nullptr;
+        ffmpeg_stop_complete = true;
     }
 }

@@ -7,6 +7,7 @@ import com.github.zedmediaplayerlib.audio.ZedAudioPlayer
 import com.github.zedmediaplayerlib.audio.listener.OnLoadListener
 import com.github.zedmediaplayerlib.audio.listener.OnPauseListener
 import com.github.zedmediaplayerlib.audio.listener.OnPreparedListener
+import com.github.zedmediaplayerlib.audio.listener.OnStopListener
 import kotlinx.android.synthetic.main.activity_zed_audio.*
 import java.io.File
 
@@ -39,6 +40,11 @@ class ZedAudioActivity : AppCompatActivity() {
                 } else Log.i("zzed", "media is resume playing...")
             }
         })
+        zedAudioPlayer.setOnStopListener(object : OnStopListener {
+            override fun onStop() {
+                Log.i("zzed", "media is stopped!")
+            }
+        })
         prepare.setOnClickListener {
             zedAudioPlayer.prepared(
                 File(
@@ -52,6 +58,9 @@ class ZedAudioActivity : AppCompatActivity() {
         }
         resume.setOnClickListener {
             zedAudioPlayer.pause(false)
+        }
+        stop.setOnClickListener {
+            zedAudioPlayer.stop()
         }
     }
 }

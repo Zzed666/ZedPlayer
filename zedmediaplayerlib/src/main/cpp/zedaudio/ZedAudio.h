@@ -14,6 +14,7 @@ public:
     int audio_index = -1;
     uint8_t *out_buffer;
 
+    AVCodec *pAvCodec = nullptr;
     AVCodecContext *pAvCodecCtx = nullptr;
     AVPacket *pAvPacket = nullptr;
     AVFrame *pAvFrame = nullptr;
@@ -42,6 +43,7 @@ public:
     void pause(bool is_pause);
     void stop();
     void releaseTempSource();
+    void release();
 };
 
 

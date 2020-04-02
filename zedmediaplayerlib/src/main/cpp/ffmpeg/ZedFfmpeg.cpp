@@ -11,7 +11,7 @@ ZedFfmpeg::ZedFfmpeg(ZedStatus *zedStatus, CCallJava *cCallJava) {
 }
 
 void ZedFfmpeg::prepareMedia(const char *mediaPath) {
-    cCallJava->callOnLoad(CTHREADTYPE_CHILD,true);
+    cCallJava->callOnLoad(CTHREADTYPE_CHILD, true);
     pthread_mutex_lock(&load_thread_mutex);
     //初始化网络
     avformat_network_init();
@@ -39,7 +39,7 @@ void ZedFfmpeg::prepareMedia(const char *mediaPath) {
     for (int i = 0; i < pFormatCtx->nb_streams; i++) {
         if (pFormatCtx->streams[i]->codecpar->codec_type == AVMEDIA_TYPE_AUDIO) {
             if (zedAudio == nullptr) {
-                zedAudio = new ZedAudio(zedStatus,cCallJava);
+                zedAudio = new ZedAudio(zedStatus, cCallJava);
             }
             foundAudioStream = true;
             zedAudio->audio_index = i;
@@ -55,8 +55,8 @@ void ZedFfmpeg::prepareMedia(const char *mediaPath) {
         return;
     }
     //获取解码器
-    pCodec = avcodec_find_decoder(pFormatCtx->streams[zedAudio->audio_index]->codecpar->codec_id);
-    if (!pCodec) {
+    zedAudio->pAvCodec = avcodec_find_decoder(pFormatCtx->streams[zedAudio->audio_index]->codecpar->codec_id);
+    if (!zedAudio->pAvCodec) {
         if (FFMPEG_LOG) {
             FFLOGE("Couldn't get codec.");
         }
@@ -65,7 +65,7 @@ void ZedFfmpeg::prepareMedia(const char *mediaPath) {
         return;
     }
     //分配空间给解码器上下文
-    zedAudio->pAvCodecCtx = avcodec_alloc_context3(pCodec);
+    zedAudio->pAvCodecCtx = avcodec_alloc_context3(zedAudio->pAvCodec);
     if (!zedAudio->pAvCodecCtx) {
         if (FFMPEG_LOG) {
             FFLOGE("Couldn't alloc codecCtx.");
@@ -85,7 +85,7 @@ void ZedFfmpeg::prepareMedia(const char *mediaPath) {
         return;
     }
     //打开解码器
-    if (avcodec_open2(zedAudio->pAvCodecCtx, pCodec, nullptr) != 0) {
+    if (avcodec_open2(zedAudio->pAvCodecCtx, zedAudio->pAvCodec, nullptr) != 0) {
         if (FFMPEG_LOG) {
             FFLOGE("Couldn't open codec.");
         }
@@ -137,6 +137,48 @@ void ZedFfmpeg::startDecodeAudio() {
 
 void ZedFfmpeg::pauseAudio(bool is_pause) {
     zedAudio->pause(is_pause);
+}
+
+void ZedFfmpeg::stopAudio() {
+    if (zedStatus->exit) {
+        return;
+    }
+    zedStatus->exit = true;
+    int sleep_count = 0;
+    pthread_mutex_lock(&load_thread_mutex);
+    while (!ffmpeg_load_exit) {
+        if (sleep_count > 1000) ffmpeg_load_exit = true;
+        if (FFMPEG_LOG) {
+            FFLOGI("wait ffmpeg load time:%d", sleep_count);
+        }
+        sleep_count++;
+        av_usleep(10 * 1000);
+    }
+    if (zedAudio != nullptr) {
+        zedAudio->stop();
+    }
+    cCallJava->callOnStop(CTHREADTYPE_CHILD);
+    release();
+    pthread_mutex_unlock(&load_thread_mutex);
+}
+
+void ZedFfmpeg::release() {
+    if(zedAudio != nullptr){
+        zedAudio->release();
+        delete(zedAudio);
+        zedAudio = nullptr;
+    }
+    if(pFormatCtx != nullptr){
+        avformat_close_input(&pFormatCtx);
+        avformat_free_context(pFormatCtx);
+        pFormatCtx = nullptr;
+    }
+    if (zedStatus != nullptr) {
+        zedStatus = nullptr;
+    }
+    if (cCallJava != nullptr) {
+        cCallJava = nullptr;
+    }
 }
 
 ZedFfmpeg::~ZedFfmpeg() {
