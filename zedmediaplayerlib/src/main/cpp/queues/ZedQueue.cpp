@@ -56,6 +56,20 @@ int ZedQueue::getPacketSize() {
     return size;
 }
 
+void ZedQueue::clearAvPackets() {
+    pthread_cond_signal(&decode_thread_cond);
+    pthread_mutex_lock(&decode_thread_mutex);
+    while (!zedQueue.empty()) {
+        AVPacket *avPacket = nullptr;
+        avPacket = zedQueue.front();
+        zedQueue.pop();
+        av_packet_free(&avPacket);
+        av_free(avPacket);
+        avPacket = nullptr;
+    }
+    pthread_mutex_unlock(&decode_thread_mutex);
+}
+
 ZedQueue::~ZedQueue() {
     pthread_mutex_destroy(&decode_thread_mutex);
     pthread_cond_destroy(&decode_thread_cond);

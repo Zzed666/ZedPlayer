@@ -6,9 +6,11 @@ class ZedAudioPlayer {
     private var onLoadListener: OnLoadListener? = null
     private var onPreparedListener: OnPreparedListener? = null
     private var onPauseListener: OnPauseListener? = null
+    private var onSeekListener: OnSeekListener? = null
     private var onStopListener: OnStopListener? = null
     private var onPlayTimeListener: OnPlayTimeListener? = null
     private var onErrorListener: OnErrorListener? = null
+    private var onCompleteListener: OnCompleteListener? = null
 
     companion object {
         init {
@@ -25,6 +27,7 @@ class ZedAudioPlayer {
 
     private external fun n_prepared(path: String)
     private external fun n_pause(pause: Boolean)
+    private external fun n_seek(seekTime: Int)
     private external fun n_stop()
 
     /**-------------------------------------------load---------------------------------------*/
@@ -69,6 +72,22 @@ class ZedAudioPlayer {
     }
     /**-------------------------------------------pause or resume---------------------------------------*/
 
+    /**-------------------------------------------seek---------------------------------------*/
+    fun setOnSeekListener(onSeekListener: OnSeekListener) {
+        this.onSeekListener = onSeekListener
+    }
+
+    fun seek(seekTime: Int) {
+        Thread(Runnable {
+            n_seek(seekTime)
+        }).start()
+    }
+
+    fun cCallSeekBack(totalTime: Int, seekTime: Int) {
+        onSeekListener?.onSeek(seekTime, totalTime)
+    }
+    /**-------------------------------------------seek---------------------------------------*/
+
     /**-------------------------------------------stop---------------------------------------*/
     fun setOnStopListener(onStopListener: OnStopListener) {
         this.onStopListener = onStopListener
@@ -105,4 +124,14 @@ class ZedAudioPlayer {
         onErrorListener?.onError(errorCode, errorMsg)
     }
     /**-------------------------------------------error---------------------------------------*/
+
+    /**-------------------------------------------complete---------------------------------------*/
+    fun setOnOnCompleteListener(onCompleteListener: OnCompleteListener) {
+        this.onCompleteListener = onCompleteListener
+    }
+
+    fun cCallCompleteBack() {
+        onCompleteListener?.onComplete()
+    }
+    /**-------------------------------------------complete---------------------------------------*/
 }

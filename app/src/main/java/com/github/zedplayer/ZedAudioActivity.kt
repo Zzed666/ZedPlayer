@@ -39,6 +39,11 @@ class ZedAudioActivity : AppCompatActivity() {
                 } else Log.i("zzed", "media is resume playing...")
             }
         })
+        zedAudioPlayer.setOnSeekListener(object : OnSeekListener {
+            override fun onSeek(seekTime: Int,totalTime: Int) {
+                Log.i("zzed", "media seeks to ${ZedTimeUtil.secdsToDateFormat(seekTime, totalTime)}")
+            }
+        })
         zedAudioPlayer.setOnStopListener(object : OnStopListener {
             override fun onStop() {
                 Log.i("zzed", "media is stopped!")
@@ -67,11 +72,16 @@ class ZedAudioActivity : AppCompatActivity() {
                 Log.e("zzed", "media error,error code is $errorCode,error message is $errorMsg!")
             }
         })
+        zedAudioPlayer.setOnOnCompleteListener(object : OnCompleteListener {
+            override fun onComplete() {
+                Log.i("zzed", "media play completely!")
+            }
+        })
         prepare.setOnClickListener {
             zedAudioPlayer.prepared(
                 File(
                     Environment.getExternalStorageDirectory(),
-                    "Yasuo1.mp3"
+                    "Yasuo.mp3"
                 ).absolutePath
             )
         }
@@ -80,6 +90,9 @@ class ZedAudioActivity : AppCompatActivity() {
         }
         resume.setOnClickListener {
             zedAudioPlayer.pause(false)
+        }
+        seek.setOnClickListener {
+            zedAudioPlayer.seek(140)
         }
         stop.setOnClickListener {
             zedAudioPlayer.stop()

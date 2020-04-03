@@ -22,12 +22,14 @@ public:
     ZedStatus *zedStatus = nullptr;
 
     pthread_mutex_t load_thread_mutex;
+    pthread_mutex_t seek_thread_mutex;
 public:
     ZedFfmpeg(ZedStatus *zedStatus,CCallJava *cCallJava);
     ~ZedFfmpeg();
     void prepareMedia(const char* mediaPath);
     void startDecodeAudio();
     void pauseAudio(bool pause);
+    void seekAudio(int64_t seek_time);
     void stopAudio();
     void release();
 };

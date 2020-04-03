@@ -69,6 +69,20 @@ Java_com_github_zedmediaplayerlib_audio_ZedAudioPlayer_n_1pause(JNIEnv *env,
 }
 
 extern "C" JNIEXPORT void JNICALL
+Java_com_github_zedmediaplayerlib_audio_ZedAudioPlayer_n_1seek(JNIEnv *env,
+                                                               jobject obj,
+                                                               jint seek_time) {
+    if (zedFfmpeg != nullptr) {
+        zedFfmpeg->seekAudio(seek_time);
+    } else {
+        if (FFMPEG_LOG) {
+            FFLOGE("ffmpeg seek return because of it isn't initial!")
+            return;
+        }
+    }
+}
+
+extern "C" JNIEXPORT void JNICALL
 Java_com_github_zedmediaplayerlib_audio_ZedAudioPlayer_n_1stop(JNIEnv *env,
                                                                jobject obj) {
     if (zedFfmpeg != nullptr) {

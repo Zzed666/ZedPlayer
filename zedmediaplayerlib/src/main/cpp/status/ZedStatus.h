@@ -9,6 +9,7 @@
 class ZedStatus {
 public:
     bool load;
+    bool seeking;
     bool exit;
 public:
     ZedStatus();

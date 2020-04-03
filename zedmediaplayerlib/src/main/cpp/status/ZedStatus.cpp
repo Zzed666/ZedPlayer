@@ -6,6 +6,7 @@
 
 ZedStatus::ZedStatus() {
     load = true;
+    seeking = false;
     exit = false;
 }
 

@@ -23,6 +23,7 @@ public:
     void putPackets(AVPacket *avPacket);
     int getPackets(AVPacket *avPacket);
     int getPacketSize();
+    void clearAvPackets();
 };
 
 

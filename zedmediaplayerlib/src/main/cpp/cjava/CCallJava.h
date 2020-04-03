@@ -22,6 +22,7 @@ public:
     jmethodID jpreparemid = nullptr;
     jmethodID jplaytimemid = nullptr;
     jmethodID jpausemid = nullptr;
+    jmethodID jseekmid = nullptr;
     jmethodID jstopmid = nullptr;
     jmethodID jerrormid = nullptr;
 public:
@@ -31,6 +32,7 @@ public:
     void callOnPrepare(int cType);
     void callOnPlayTime(int cType, int total, int current);
     void callOnPause(int cType, bool pause);
+    void callOnSeek(int cType, int total, int seek);
     void callOnStop(int cType);
     void callOnError(int cType, int errorCode, char *errorMsg);
 };
