@@ -62,11 +62,16 @@ class ZedAudioActivity : AppCompatActivity() {
                 })
             }
         })
+        zedAudioPlayer.setOnErrorListener(object : OnErrorListener {
+            override fun onError(errorCode: Int, errorMsg: String) {
+                Log.e("zzed", "media error,error code is $errorCode,error message is $errorMsg!")
+            }
+        })
         prepare.setOnClickListener {
             zedAudioPlayer.prepared(
                 File(
                     Environment.getExternalStorageDirectory(),
-                    "Yasuo.mp3"
+                    "Yasuo1.mp3"
                 ).absolutePath
             )
         }

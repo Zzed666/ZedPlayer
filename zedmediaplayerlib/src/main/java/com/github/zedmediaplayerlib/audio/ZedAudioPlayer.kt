@@ -8,6 +8,7 @@ class ZedAudioPlayer {
     private var onPauseListener: OnPauseListener? = null
     private var onStopListener: OnStopListener? = null
     private var onPlayTimeListener: OnPlayTimeListener? = null
+    private var onErrorListener: OnErrorListener? = null
 
     companion object {
         init {
@@ -93,4 +94,15 @@ class ZedAudioPlayer {
         onPlayTimeListener?.onPlayTime(totalTime, currentTime)
     }
     /**-------------------------------------------play time---------------------------------------*/
+
+    /**-------------------------------------------error---------------------------------------*/
+    fun setOnErrorListener(onErrorListener: OnErrorListener) {
+        this.onErrorListener = onErrorListener
+    }
+
+    fun cCallErrorBack(errorCode: Int, errorMsg: String) {
+        stop()
+        onErrorListener?.onError(errorCode, errorMsg)
+    }
+    /**-------------------------------------------error---------------------------------------*/
 }

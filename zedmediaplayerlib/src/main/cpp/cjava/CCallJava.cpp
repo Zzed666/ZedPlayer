@@ -21,6 +21,7 @@ CCallJava::CCallJava(JavaVM *vm, JNIEnv *env, jobject obj) {
     jplaytimemid = jEnv->GetMethodID(claz, "cCallPlayTimeBack", "(II)V");
     jpausemid = jEnv->GetMethodID(claz, "cCallPauseBack", "(Z)V");
     jstopmid = jEnv->GetMethodID(claz, "cCallStopBack", "()V");
+    jerrormid = jEnv->GetMethodID(claz, "cCallErrorBack", "(ILjava/lang/String;)V");
 }
 
 CCallJava::~CCallJava() {
@@ -116,6 +117,29 @@ void CCallJava::callOnStop(int cType) {
             isAttached = true;
         }
         jniEnv->CallVoidMethod(jobj, jstopmid);
+        if (isAttached) {
+            jvm->DetachCurrentThread();
+        }
+    }
+}
+
+void CCallJava::callOnError(int cType, int errorCode, char *errorMsg) {
+    if (cType == CTHREADTYPE_MAIN) {
+        jstring error_msg = jEnv->NewStringUTF(errorMsg);
+        jEnv->CallVoidMethod(jobj, jerrormid, errorCode, error_msg);
+        jEnv->DeleteLocalRef(error_msg);
+    } else if (cType == CTHREADTYPE_CHILD) {
+        JNIEnv *jniEnv;
+        bool isAttached = false;
+        if ((jvm->GetEnv((void **) &jniEnv, JNI_VERSION_1_6)) < 0) {
+            if (jvm->AttachCurrentThread(&jniEnv, 0)) {
+                return;
+            }
+            isAttached = true;
+        }
+        jstring error_msg = jniEnv->NewStringUTF(errorMsg);
+        jniEnv->CallVoidMethod(jobj, jerrormid, errorCode, error_msg);
+        jniEnv->DeleteLocalRef(error_msg);
         if (isAttached) {
             jvm->DetachCurrentThread();
         }

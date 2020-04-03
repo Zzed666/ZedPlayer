@@ -23,6 +23,7 @@ public:
     jmethodID jplaytimemid = nullptr;
     jmethodID jpausemid = nullptr;
     jmethodID jstopmid = nullptr;
+    jmethodID jerrormid = nullptr;
 public:
     CCallJava(JavaVM *vm, JNIEnv *env, jobject obj);
     ~CCallJava();
@@ -31,6 +32,7 @@ public:
     void callOnPlayTime(int cType, int total, int current);
     void callOnPause(int cType, bool pause);
     void callOnStop(int cType);
+    void callOnError(int cType, int errorCode, char *errorMsg);
 };
 
 

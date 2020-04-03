@@ -56,6 +56,15 @@ Java_com_github_zedmediaplayerlib_audio_ZedAudioPlayer_n_1pause(JNIEnv *env,
                                                                 jboolean is_pause) {
     if (zedFfmpeg != nullptr) {
         zedFfmpeg->pauseAudio(is_pause);
+    } else {
+        if (FFMPEG_LOG) {
+            if (is_pause) {
+                FFLOGE("ffmpeg pause return because of it isn't initial!")
+            } else {
+                FFLOGE("ffmpeg resume return because of it isn't initial!")
+            }
+            return;
+        }
     }
 }
 
@@ -63,8 +72,8 @@ extern "C" JNIEXPORT void JNICALL
 Java_com_github_zedmediaplayerlib_audio_ZedAudioPlayer_n_1stop(JNIEnv *env,
                                                                jobject obj) {
     if (zedFfmpeg != nullptr) {
-        if(!ffmpeg_stop_complete){
-            FFLOGI("ffmpeg stop is not complete")
+        if (!ffmpeg_stop_complete) {
+            FFLOGE("ffmpeg stop is not complete")
             return;
         }
         ffmpeg_stop_complete = false;
@@ -80,5 +89,10 @@ Java_com_github_zedmediaplayerlib_audio_ZedAudioPlayer_n_1stop(JNIEnv *env,
         delete (zedFfmpeg);
         zedFfmpeg = nullptr;
         ffmpeg_stop_complete = true;
+    } else {
+        if (FFMPEG_LOG) {
+            FFLOGE("ffmpeg stop return because of it isn't initial!")
+            return;
+        }
     }
 }

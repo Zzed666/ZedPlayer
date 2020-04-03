@@ -23,6 +23,7 @@ void ZedFfmpeg::prepareMedia(const char *mediaPath) {
             FFLOGE("Cloudn't open the media:%s", mediaPath);
         }
         ffmpeg_load_exit = true;
+        cCallJava->callOnError(CTHREADTYPE_CHILD, 101, "Cloudn't open the media");
         pthread_mutex_unlock(&load_thread_mutex);
         return;
     }
@@ -32,6 +33,7 @@ void ZedFfmpeg::prepareMedia(const char *mediaPath) {
             FFLOGE("Cloudn't get the media stream.");
         }
         ffmpeg_load_exit = true;
+        cCallJava->callOnError(CTHREADTYPE_CHILD, 102, "Cloudn't get the media stream.");
         pthread_mutex_unlock(&load_thread_mutex);
         return;
     }
@@ -52,6 +54,7 @@ void ZedFfmpeg::prepareMedia(const char *mediaPath) {
             FFLOGE("Couldn't find audio.");
         }
         ffmpeg_load_exit = true;
+        cCallJava->callOnError(CTHREADTYPE_CHILD, 103, "Couldn't find audio.");
         pthread_mutex_unlock(&load_thread_mutex);
         return;
     }
@@ -63,6 +66,7 @@ void ZedFfmpeg::prepareMedia(const char *mediaPath) {
             FFLOGE("Couldn't get codec.");
         }
         ffmpeg_load_exit = true;
+        cCallJava->callOnError(CTHREADTYPE_CHILD, 104, "Couldn't get codec.");
         pthread_mutex_unlock(&load_thread_mutex);
         return;
     }
@@ -73,6 +77,7 @@ void ZedFfmpeg::prepareMedia(const char *mediaPath) {
             FFLOGE("Couldn't alloc codecCtx.");
         }
         ffmpeg_load_exit = true;
+        cCallJava->callOnError(CTHREADTYPE_CHILD, 105, "Couldn't alloc codecCtx.");
         pthread_mutex_unlock(&load_thread_mutex);
         return;
     }
@@ -83,6 +88,7 @@ void ZedFfmpeg::prepareMedia(const char *mediaPath) {
             FFLOGE("Couldn't params to codecCtx.");
         }
         ffmpeg_load_exit = true;
+        cCallJava->callOnError(CTHREADTYPE_CHILD, 106, "Couldn't params to codecCtx.");
         pthread_mutex_unlock(&load_thread_mutex);
         return;
     }
@@ -92,6 +98,7 @@ void ZedFfmpeg::prepareMedia(const char *mediaPath) {
             FFLOGE("Couldn't open codec.");
         }
         ffmpeg_load_exit = true;
+        cCallJava->callOnError(CTHREADTYPE_CHILD, 107, "Couldn't open codec.");
         pthread_mutex_unlock(&load_thread_mutex);
         return;
     }
@@ -146,6 +153,9 @@ void ZedFfmpeg::pauseAudio(bool is_pause) {
 
 void ZedFfmpeg::stopAudio() {
     if (zedStatus->exit) {
+        if (FFMPEG_LOG) {
+            FFLOGI("ffmpeg has already exited");
+        }
         return;
     }
     zedStatus->exit = true;
