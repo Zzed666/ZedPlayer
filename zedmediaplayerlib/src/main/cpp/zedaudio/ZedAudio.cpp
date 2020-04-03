@@ -26,7 +26,8 @@ void openSLESBufferQueueCallBack(SLAndroidSimpleBufferQueueItf bufferQueueItf, v
         if (zedAudio->clock_time - zedAudio->last_time >= 0.1) {
             zedAudio->last_time = zedAudio->clock_time;
         }
-        zedAudio->cCallJava->callOnPlayTime(CTHREADTYPE_CHILD,zedAudio->total_duration,zedAudio->clock_time);
+        zedAudio->cCallJava->callOnPlayTime(CTHREADTYPE_CHILD, zedAudio->total_duration,
+                                            zedAudio->clock_time);
         //将重采样后的数据压入OpenSLES中的播放队列中
         if (size > 0) {
             (*zedAudio->androidSimpleBufferQueue)->Enqueue(zedAudio->androidSimpleBufferQueue,
@@ -62,7 +63,7 @@ void ZedAudio::prepareOpenSELS() {
     SLDataFormat_PCM dataFormatPcm = {
             SL_DATAFORMAT_PCM,
             2,
-            SL_SAMPLINGRATE_44_1,
+            static_cast<SLuint32>(getCurrentSampleRate(sample_rate)),
             SL_PCMSAMPLEFORMAT_FIXED_16,
             SL_PCMSAMPLEFORMAT_FIXED_16,
             SL_SPEAKER_FRONT_LEFT | SL_SPEAKER_FRONT_RIGHT,
@@ -188,6 +189,54 @@ void ZedAudio::stop() {
     if (playPlay != nullptr) {
         (*playPlay)->SetPlayState(playPlay, SL_PLAYSTATE_STOPPED);
     }
+}
+
+int ZedAudio::getCurrentSampleRate(int sample_rate) {
+    int rate = 0;
+    switch (sample_rate) {
+        case 8000:
+            rate = SL_SAMPLINGRATE_8;
+            break;
+        case 11025:
+            rate = SL_SAMPLINGRATE_11_025;
+            break;
+        case 12000:
+            rate = SL_SAMPLINGRATE_12;
+            break;
+        case 16000:
+            rate = SL_SAMPLINGRATE_16;
+            break;
+        case 22050:
+            rate = SL_SAMPLINGRATE_22_05;
+            break;
+        case 24000:
+            rate = SL_SAMPLINGRATE_24;
+            break;
+        case 32000:
+            rate = SL_SAMPLINGRATE_32;
+            break;
+        case 44100:
+            rate = SL_SAMPLINGRATE_44_1;
+            break;
+        case 48000:
+            rate = SL_SAMPLINGRATE_48;
+            break;
+        case 64000:
+            rate = SL_SAMPLINGRATE_64;
+            break;
+        case 88200:
+            rate = SL_SAMPLINGRATE_88_2;
+            break;
+        case 96000:
+            rate = SL_SAMPLINGRATE_96;
+            break;
+        case 192000:
+            rate = SL_SAMPLINGRATE_192;
+            break;
+        default:
+            rate = SL_SAMPLINGRATE_44_1;
+    }
+    return rate;
 }
 
 void ZedAudio::releaseTempSource() {

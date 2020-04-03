@@ -48,6 +48,7 @@ public:
     void play();
     void pause(bool is_pause);
     void stop();
+    int getCurrentSampleRate(int sample_rate);
     void releaseTempSource();
     void release();
 };
