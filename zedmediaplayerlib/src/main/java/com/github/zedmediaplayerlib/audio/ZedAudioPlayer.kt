@@ -29,7 +29,7 @@ class ZedAudioPlayer {
     private external fun n_start()
     private external fun n_pause(pause: Boolean)
     private external fun n_seek(seekTime: Int)
-    private external fun n_stop()
+    private external fun n_stop(skipNext: Boolean, nextMediaPath: String)
 
     /**-------------------------------------------load---------------------------------------*/
     fun setOnLoadListener(onLoadListener: OnLoadListener) {
@@ -63,10 +63,6 @@ class ZedAudioPlayer {
             n_start()
         }).start()
     }
-
-//    fun cCallPreparedBack() {
-//        onPreparedListener?.onPrepared()
-//    }
     /**-------------------------------------------start---------------------------------------*/
 
     /**-------------------------------------------pause or resume---------------------------------------*/
@@ -108,7 +104,7 @@ class ZedAudioPlayer {
 
     fun stop() {
         Thread(Runnable {
-            n_stop()
+            n_stop(false, "")
         }).start()
     }
 
@@ -144,8 +140,20 @@ class ZedAudioPlayer {
     }
 
     fun cCallCompleteBack() {
-        stop()
+//        stop()
         onCompleteListener?.onComplete()
     }
     /**-------------------------------------------complete---------------------------------------*/
+
+    /**-------------------------------------------next---------------------------------------*/
+    fun next(nextMediaPath: String) {
+        Thread(Runnable {
+            n_stop(true, nextMediaPath)
+        }).start()
+    }
+
+    fun cCallNextBack(nextMediaPath: String) {
+        prepared(nextMediaPath)
+    }
+    /**-------------------------------------------next---------------------------------------*/
 }

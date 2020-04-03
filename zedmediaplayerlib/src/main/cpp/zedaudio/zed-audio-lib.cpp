@@ -97,7 +97,9 @@ Java_com_github_zedmediaplayerlib_audio_ZedAudioPlayer_n_1seek(JNIEnv *env,
 
 extern "C" JNIEXPORT void JNICALL
 Java_com_github_zedmediaplayerlib_audio_ZedAudioPlayer_n_1stop(JNIEnv *env,
-                                                               jobject obj) {
+                                                               jobject obj,
+                                                               jboolean skipNext,
+                                                               jstring nextMediaPath_) {
     if (zedFfmpeg != nullptr) {
         if (!ffmpeg_stop_complete) {
             FFLOGE("ffmpeg stop is not complete")
@@ -120,7 +122,11 @@ Java_com_github_zedmediaplayerlib_audio_ZedAudioPlayer_n_1stop(JNIEnv *env,
     } else {
         if (FFMPEG_LOG) {
             FFLOGE("ffmpeg stop return because of it isn't initial!")
-            return;
         }
+    }
+    if (skipNext) {
+        jclass claz = env->GetObjectClass(obj);
+        jmethodID jnextmid = env->GetMethodID(claz, "cCallNextBack", "(Ljava/lang/String;)V");
+        env->CallVoidMethod(obj, jnextmid, nextMediaPath_);
     }
 }

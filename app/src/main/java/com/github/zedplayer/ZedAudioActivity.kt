@@ -41,8 +41,11 @@ class ZedAudioActivity : AppCompatActivity() {
             }
         })
         zedAudioPlayer.setOnSeekListener(object : OnSeekListener {
-            override fun onSeek(seekTime: Int,totalTime: Int) {
-                Log.i("zzed", "media seeks to ${ZedTimeUtil.secdsToDateFormat(seekTime, totalTime)}")
+            override fun onSeek(seekTime: Int, totalTime: Int) {
+                Log.i(
+                    "zzed",
+                    "media seeks to ${ZedTimeUtil.secdsToDateFormat(seekTime, totalTime)}"
+                )
             }
         })
         zedAudioPlayer.setOnStopListener(object : OnStopListener {
@@ -76,6 +79,7 @@ class ZedAudioActivity : AppCompatActivity() {
         zedAudioPlayer.setOnOnCompleteListener(object : OnCompleteListener {
             override fun onComplete() {
                 Log.i("zzed", "media play completely!")
+                zedAudioPlayer.stop()
             }
         })
         prepare.setOnClickListener {
@@ -97,6 +101,14 @@ class ZedAudioActivity : AppCompatActivity() {
         }
         stop.setOnClickListener {
             zedAudioPlayer.stop()
+        }
+        next.setOnClickListener {
+            zedAudioPlayer.next(
+                File(
+                    Environment.getExternalStorageDirectory(),
+                    "告白の夜.mp3"
+                ).absolutePath
+            )
         }
     }
 }
