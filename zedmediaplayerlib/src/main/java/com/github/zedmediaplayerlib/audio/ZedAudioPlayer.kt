@@ -26,6 +26,7 @@ class ZedAudioPlayer {
     }
 
     private external fun n_prepared(path: String)
+    private external fun n_start()
     private external fun n_pause(pause: Boolean)
     private external fun n_seek(seekTime: Int)
     private external fun n_stop()
@@ -55,6 +56,18 @@ class ZedAudioPlayer {
         onPreparedListener?.onPrepared()
     }
     /**-------------------------------------------prepared---------------------------------------*/
+
+    /**-------------------------------------------start---------------------------------------*/
+    fun start() {
+        Thread(Runnable {
+            n_start()
+        }).start()
+    }
+
+//    fun cCallPreparedBack() {
+//        onPreparedListener?.onPrepared()
+//    }
+    /**-------------------------------------------start---------------------------------------*/
 
     /**-------------------------------------------pause or resume---------------------------------------*/
     fun setOnPauseListener(onPauseListener: OnPauseListener) {

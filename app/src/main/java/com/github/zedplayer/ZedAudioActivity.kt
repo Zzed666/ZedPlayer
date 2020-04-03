@@ -30,6 +30,7 @@ class ZedAudioActivity : AppCompatActivity() {
         zedAudioPlayer.setOnPrepareListener(object : OnPreparedListener {
             override fun onPrepared() {
                 Log.i("zzed", "media is prepared to play")
+                zedAudioPlayer.start()
             }
         })
         zedAudioPlayer.setOnPauseListener(object : OnPauseListener {

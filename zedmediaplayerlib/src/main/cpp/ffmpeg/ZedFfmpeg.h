@@ -27,7 +27,7 @@ public:
     ZedFfmpeg(ZedStatus *zedStatus,CCallJava *cCallJava);
     ~ZedFfmpeg();
     void prepareMedia(const char* mediaPath);
-    void startDecodeAudio();
+    void startAudio();
     void pauseAudio(bool pause);
     void seekAudio(int64_t seek_time);
     void stopAudio();

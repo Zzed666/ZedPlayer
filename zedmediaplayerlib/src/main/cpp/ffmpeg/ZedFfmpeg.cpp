@@ -116,17 +116,24 @@ void ZedFfmpeg::prepareMedia(const char *mediaPath) {
         pthread_mutex_unlock(&load_thread_mutex);
         return;
     }
-    cCallJava->callOnPrepare(CTHREADTYPE_CHILD);
+    if (cCallJava != NULL) {
+        cCallJava->callOnPrepare(CTHREADTYPE_CHILD);
+    }
     ffmpeg_load_exit = true;
     pthread_mutex_unlock(&load_thread_mutex);
-    startDecodeAudio();
 }
 
-void ZedFfmpeg::startDecodeAudio() {
+void ZedFfmpeg::startAudio() {
+    if (zedAudio == nullptr) {
+        if (FFMPEG_LOG) {
+            FFLOGE("ffmpeg startAudio return because of zedAudio is null");
+        }
+        return;
+    }
     zedAudio->play();
     while (zedStatus != nullptr && !zedStatus->exit) {
         if (zedStatus->seeking) {
-            if(FFMPEG_LOG){
+            if (FFMPEG_LOG) {
                 FFLOGI("ffmpeg is seeking,continue to decode audio");
             }
             continue;
@@ -138,7 +145,7 @@ void ZedFfmpeg::startDecodeAudio() {
          * 即使seek的时候clear queue中AvPacket也只是清除此数值大小的队列数据，av_read_frame=0依然可以读到下一帧数据
          * 另外还可以减少内存的占用
          * */
-        if(zedAudio->zedQueue->getPacketSize() > 40){
+        if (zedAudio->zedQueue->getPacketSize() > 40) {
             continue;
         }
         //读取数据到AVPacket
@@ -171,7 +178,9 @@ void ZedFfmpeg::startDecodeAudio() {
         }
     }
 
-    cCallJava->callOnComplete(CTHREADTYPE_CHILD);
+    if (cCallJava != NULL) {
+        cCallJava->callOnComplete(CTHREADTYPE_CHILD);
+    }
 
     if (FFMPEG_LOG) {
         FFLOGI("解码播放完成");

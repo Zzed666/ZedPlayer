@@ -51,6 +51,19 @@ Java_com_github_zedmediaplayerlib_audio_ZedAudioPlayer_n_1prepared(JNIEnv *env,
 }
 
 extern "C" JNIEXPORT void JNICALL
+Java_com_github_zedmediaplayerlib_audio_ZedAudioPlayer_n_1start(JNIEnv *env,
+                                                                jobject obj) {
+    if (zedFfmpeg != nullptr) {
+        zedFfmpeg->startAudio();
+    } else {
+        if (FFMPEG_LOG) {
+            FFLOGE("ffmpeg start return because of it isn't initial!")
+            return;
+        }
+    }
+}
+
+extern "C" JNIEXPORT void JNICALL
 Java_com_github_zedmediaplayerlib_audio_ZedAudioPlayer_n_1pause(JNIEnv *env,
                                                                 jobject obj,
                                                                 jboolean is_pause) {
