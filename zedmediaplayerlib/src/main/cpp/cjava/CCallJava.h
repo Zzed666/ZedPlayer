@@ -25,6 +25,7 @@ public:
     jmethodID jseekmid = nullptr;
     jmethodID jstopmid = nullptr;
     jmethodID jerrormid = nullptr;
+    jmethodID jcompletemid = nullptr;
 public:
     CCallJava(JavaVM *vm, JNIEnv *env, jobject obj);
     ~CCallJava();
@@ -35,6 +36,7 @@ public:
     void callOnSeek(int cType, int total, int seek);
     void callOnStop(int cType);
     void callOnError(int cType, int errorCode, char *errorMsg);
+    void callOnComplete(int cType);
 };
 
 

@@ -90,6 +90,7 @@ Java_com_github_zedmediaplayerlib_audio_ZedAudioPlayer_n_1stop(JNIEnv *env,
             FFLOGE("ffmpeg stop is not complete")
             return;
         }
+        FFLOGI("ffmpeg stopping");
         ffmpeg_stop_complete = false;
         zedFfmpeg->stopAudio();
         if (zedStatus != nullptr) {

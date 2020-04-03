@@ -92,7 +92,7 @@ class ZedAudioActivity : AppCompatActivity() {
             zedAudioPlayer.pause(false)
         }
         seek.setOnClickListener {
-            zedAudioPlayer.seek(140)
+            zedAudioPlayer.seek(270)
         }
         stop.setOnClickListener {
             zedAudioPlayer.stop()

@@ -171,6 +171,8 @@ void ZedFfmpeg::startDecodeAudio() {
         }
     }
 
+    cCallJava->callOnComplete(CTHREADTYPE_CHILD);
+
     if (FFMPEG_LOG) {
         FFLOGI("解码播放完成");
     }
@@ -210,12 +212,13 @@ void ZedFfmpeg::seekAudio(int64_t seek_time) {
 }
 
 void ZedFfmpeg::stopAudio() {
-    if (zedStatus->exit) {
-        if (FFMPEG_LOG) {
-            FFLOGI("ffmpeg has already exited");
-        }
-        return;
-    }
+//    //为了防止av_read_frame = 0之后，判断getPacketSize = 0，zedStatus->exit设置为true的时候再调用stopAudio会直接return，所以这段注释掉
+//    if (zedStatus->exit) {
+//        if (FFMPEG_LOG) {
+//            FFLOGI("ffmpeg has already exited");
+//        }
+//        return;
+//    }
     zedStatus->exit = true;
     int sleep_count = 0;
     pthread_mutex_lock(&load_thread_mutex);

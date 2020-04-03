@@ -131,6 +131,7 @@ class ZedAudioPlayer {
     }
 
     fun cCallCompleteBack() {
+        stop()
         onCompleteListener?.onComplete()
     }
     /**-------------------------------------------complete---------------------------------------*/
