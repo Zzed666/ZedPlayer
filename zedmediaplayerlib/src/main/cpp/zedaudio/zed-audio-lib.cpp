@@ -95,6 +95,19 @@ Java_com_github_zedmediaplayerlib_audio_ZedAudioPlayer_n_1seek(JNIEnv *env,
     }
 }
 
+extern "C" JNIEXPORT jint JNICALL
+Java_com_github_zedmediaplayerlib_audio_ZedAudioPlayer_n_1duration(JNIEnv *env,
+                                                               jobject obj) {
+    if (zedFfmpeg != nullptr) {
+        return zedFfmpeg->total_duration;
+    } else {
+        if (FFMPEG_LOG) {
+            FFLOGE("ffmpeg get duration return because of it isn't initial!")
+        }
+        return -1;
+    }
+}
+
 extern "C" JNIEXPORT void JNICALL
 Java_com_github_zedmediaplayerlib_audio_ZedAudioPlayer_n_1stop(JNIEnv *env,
                                                                jobject obj,

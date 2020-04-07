@@ -30,6 +30,7 @@ class ZedAudioPlayer {
     private external fun n_pause(pause: Boolean)
     private external fun n_seek(seekTime: Int)
     private external fun n_stop(skipNext: Boolean, nextMediaPath: String)
+    private external fun n_duration(): Int
 
     /**-------------------------------------------load---------------------------------------*/
     fun setOnLoadListener(onLoadListener: OnLoadListener) {
@@ -116,6 +117,10 @@ class ZedAudioPlayer {
     /**-------------------------------------------play time---------------------------------------*/
     fun setOnPlayTimeListener(onPlayTimeListener: OnPlayTimeListener) {
         this.onPlayTimeListener = onPlayTimeListener
+    }
+
+    fun getDuration(): Int {
+        return n_duration()
     }
 
     fun cCallPlayTimeBack(totalTime: Int, currentTime: Int) {

@@ -3,15 +3,23 @@ package com.github.zedplayer
 import android.annotation.SuppressLint
 import android.os.*
 import android.util.Log
+import android.widget.SeekBar
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.github.zedmediaplayerlib.audio.ZedAudioPlayer
 import com.github.zedmediaplayerlib.audio.listener.*
 import com.github.zedmediaplayerlib.commons.ZedTimeUtil
+import io.reactivex.Observable
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_zed_audio.*
 import java.io.File
 
 class ZedAudioActivity : AppCompatActivity() {
-
+    private val disposables = CompositeDisposable()
+    var position: Int = 0
+    var isSeeking: Boolean = false
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_zed_audio)
@@ -68,6 +76,9 @@ class ZedAudioActivity : AppCompatActivity() {
                         totalTime,
                         totalTime
                     )}/${ZedTimeUtil.secdsToDateFormat(currentTime, totalTime)}"
+                    if (!isSeeking) {
+                        seekBar.progress = currentTime * 100 / totalTime
+                    }
                 })
             }
         })
@@ -96,9 +107,9 @@ class ZedAudioActivity : AppCompatActivity() {
         resume.setOnClickListener {
             zedAudioPlayer.pause(false)
         }
-        seek.setOnClickListener {
-            zedAudioPlayer.seek(270)
-        }
+//        seek.setOnClickListener {
+//            zedAudioPlayer.seek(270)
+//        }
         stop.setOnClickListener {
             zedAudioPlayer.stop()
         }
@@ -110,5 +121,35 @@ class ZedAudioActivity : AppCompatActivity() {
                 ).absolutePath
             )
         }
+        seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+                disposables.add(Observable.just(zedAudioPlayer.getDuration())
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe { totalDuration ->
+                        if (totalDuration >= 0) {
+                            position = totalDuration * progress / 100
+                        } else Toast.makeText(
+                            this@ZedAudioActivity,
+                            "media source isn't prepare!",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    })
+            }
+
+            override fun onStartTrackingTouch(seekBar: SeekBar?) {
+                isSeeking = true
+            }
+
+            override fun onStopTrackingTouch(seekBar: SeekBar?) {
+                isSeeking = false
+                zedAudioPlayer.seek(position)
+            }
+        })
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        disposables.clear()
     }
 }
