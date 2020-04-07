@@ -30,6 +30,7 @@ public:
     void startAudio();
     void pauseAudio(bool pause);
     void seekAudio(int64_t seek_time);
+    void volumeAudio(int volume_percent);
     void stopAudio();
     void release();
 };

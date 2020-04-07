@@ -95,6 +95,20 @@ Java_com_github_zedmediaplayerlib_audio_ZedAudioPlayer_n_1seek(JNIEnv *env,
     }
 }
 
+extern "C" JNIEXPORT void JNICALL
+Java_com_github_zedmediaplayerlib_audio_ZedAudioPlayer_n_1volume(JNIEnv *env,
+                                                               jobject obj,
+                                                               jint volume_percent) {
+    if (zedFfmpeg != nullptr) {
+        zedFfmpeg->volumeAudio(volume_percent);
+    } else {
+        if (FFMPEG_LOG) {
+            FFLOGE("ffmpeg volume return because of it isn't initial!")
+            return;
+        }
+    }
+}
+
 extern "C" JNIEXPORT jint JNICALL
 Java_com_github_zedmediaplayerlib_audio_ZedAudioPlayer_n_1duration(JNIEnv *env,
                                                                jobject obj) {

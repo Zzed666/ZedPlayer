@@ -17,6 +17,7 @@ public:
     double last_time = 0;
     double now_time = 0;
     double clock_time = 0;
+    int volume_init = 100;
     uint8_t *out_buffer;
     AVRational audio_time_base;
 
@@ -34,6 +35,7 @@ public:
     SLEnvironmentalReverbItf mixoutEnvironmentalReverb = nullptr;
     SLPlayItf playPlay = nullptr;
     SLAndroidSimpleBufferQueueItf androidSimpleBufferQueue = nullptr;
+    SLVolumeItf volumeVolume = nullptr;
 
     ZedQueue *zedQueue = nullptr;
     ZedStatus *zedStatus = nullptr;
@@ -48,6 +50,7 @@ public:
     void play();
     void pause(bool is_pause);
     void stop();
+    void volume(int percent);
     int getCurrentSampleRate(int sample_rate);
     void releaseTempSource();
     void release();

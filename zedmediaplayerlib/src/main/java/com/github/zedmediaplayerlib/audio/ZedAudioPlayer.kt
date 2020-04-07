@@ -29,6 +29,7 @@ class ZedAudioPlayer {
     private external fun n_start()
     private external fun n_pause(pause: Boolean)
     private external fun n_seek(seekTime: Int)
+    private external fun n_volume(volumePercent: Int)
     private external fun n_stop(skipNext: Boolean, nextMediaPath: String)
     private external fun n_duration(): Int
 
@@ -127,6 +128,14 @@ class ZedAudioPlayer {
         onPlayTimeListener?.onPlayTime(totalTime, currentTime)
     }
     /**-------------------------------------------play time---------------------------------------*/
+
+    /**-------------------------------------------volume---------------------------------------*/
+    fun volume(volumePercent: Int) {
+        Thread(Runnable {
+            n_volume(volumePercent)
+        }).start()
+    }
+    /**-------------------------------------------volume---------------------------------------*/
 
     /**-------------------------------------------error---------------------------------------*/
     fun setOnErrorListener(onErrorListener: OnErrorListener) {

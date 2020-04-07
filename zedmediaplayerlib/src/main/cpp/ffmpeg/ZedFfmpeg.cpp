@@ -220,6 +220,12 @@ void ZedFfmpeg::seekAudio(int64_t seek_time) {
     zedStatus->seeking = false;
 }
 
+void ZedFfmpeg::volumeAudio(int volume_percent) {
+    if (zedAudio != nullptr) {
+        zedAudio->volume(volume_percent);
+    }
+}
+
 void ZedFfmpeg::stopAudio() {
 //    //为了防止av_read_frame = 0之后，判断getPacketSize = 0，zedStatus->exit设置为true的时候再调用stopAudio会直接return，所以这段注释掉
 //    if (zedStatus->exit) {

@@ -74,17 +74,20 @@ void ZedAudio::prepareOpenSELS() {
     SLDataLocator_OutputMix outputMix = {SL_DATALOCATOR_OUTPUTMIX, mixoutObj};
     SLDataSource pAudioSrc = {&bufferQueue, &dataFormatPcm};
     SLDataSink pAudioSnk = {&outputMix, 0};
-    const SLInterfaceID playItfs[1] = {SL_IID_BUFFERQUEUE};
-    const SLboolean playBools[1] = {SL_BOOLEAN_TRUE};
+    const SLInterfaceID playItfs[2] = {SL_IID_BUFFERQUEUE, SL_IID_VOLUME};
+    const SLboolean playBools[2] = {SL_BOOLEAN_TRUE, SL_BOOLEAN_TRUE};
     (*engineEngine)->CreateAudioPlayer(engineEngine,
                                        &playObj,
                                        &pAudioSrc,
                                        &pAudioSnk,
-                                       1,
+                                       2,
                                        playItfs,
                                        playBools);
     (*playObj)->Realize(playObj, SL_BOOLEAN_FALSE);
     (*playObj)->GetInterface(playObj, SL_IID_PLAY, &playPlay);
+    //设置音量
+    (*playObj)->GetInterface(playObj, SL_IID_VOLUME, &volumeVolume);
+    volume(volume_init);
     //设置缓冲队列和回调函数
     (*playObj)->GetInterface(playObj, SL_IID_BUFFERQUEUE, &androidSimpleBufferQueue);
     (*androidSimpleBufferQueue)->RegisterCallback(androidSimpleBufferQueue,
@@ -188,6 +191,34 @@ void ZedAudio::pause(bool is_pause) {
 void ZedAudio::stop() {
     if (playPlay != nullptr) {
         (*playPlay)->SetPlayState(playPlay, SL_PLAYSTATE_STOPPED);
+    }
+}
+
+void ZedAudio::volume(int percent) {
+    volume_init = percent;
+    if (volumeVolume != nullptr) {
+        if (FFMPEG_LOG) {
+            FFLOGI("audio volume is : %d", percent);
+        }
+        if (percent > 30) {
+            (*volumeVolume)->SetVolumeLevel(volumeVolume, (100 - percent) * -20);
+        } else if (percent > 25) {
+            (*volumeVolume)->SetVolumeLevel(volumeVolume, (100 - percent) * -22);
+        } else if (percent > 20) {
+            (*volumeVolume)->SetVolumeLevel(volumeVolume, (100 - percent) * -25);
+        } else if (percent > 15) {
+            (*volumeVolume)->SetVolumeLevel(volumeVolume, (100 - percent) * -28);
+        } else if (percent > 10) {
+            (*volumeVolume)->SetVolumeLevel(volumeVolume, (100 - percent) * -30);
+        } else if (percent > 5) {
+            (*volumeVolume)->SetVolumeLevel(volumeVolume, (100 - percent) * -34);
+        } else if (percent > 3) {
+            (*volumeVolume)->SetVolumeLevel(volumeVolume, (100 - percent) * -37);
+        } else if (percent > 0) {
+            (*volumeVolume)->SetVolumeLevel(volumeVolume, (100 - percent) * -40);
+        } else {
+            (*volumeVolume)->SetVolumeLevel(volumeVolume, (100 - percent) * -100);
+        }
     }
 }
 
