@@ -32,6 +32,7 @@ class ZedAudioPlayer {
     private external fun n_volume(volumePercent: Int)
     private external fun n_stop(skipNext: Boolean, nextMediaPath: String)
     private external fun n_duration(): Int
+    private external fun n_mute(muteChannle: Int)
 
     /**-------------------------------------------load---------------------------------------*/
     fun setOnLoadListener(onLoadListener: OnLoadListener) {
@@ -170,4 +171,12 @@ class ZedAudioPlayer {
         prepared(nextMediaPath)
     }
     /**-------------------------------------------next---------------------------------------*/
+
+    /**-------------------------------------------mute---------------------------------------*/
+    fun mute(muteChannle: Int) {
+        Thread(Runnable {
+            n_mute(muteChannle)
+        }).start()
+    }
+    /**-------------------------------------------mute---------------------------------------*/
 }

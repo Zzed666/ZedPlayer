@@ -8,6 +8,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.github.zedmediaplayerlib.audio.ZedAudioPlayer
 import com.github.zedmediaplayerlib.audio.listener.*
+import com.github.zedmediaplayerlib.commons.ZedMuteEnum
 import com.github.zedmediaplayerlib.commons.ZedTimeUtil
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -22,6 +23,7 @@ class ZedAudioActivity : AppCompatActivity() {
     var position: Int = 0
     var isSeekBar: Boolean = false
     var volumeValue = 50
+    var muteValue = ZedMuteEnum.MUTE_CENTER.muteValue
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_zed_audio)
@@ -47,6 +49,7 @@ class ZedAudioActivity : AppCompatActivity() {
             override fun onPrepared() {
                 Log.i("zzed", "media is prepared to play")
                 zedAudioPlayer?.volume(volumeValue)
+                zedAudioPlayer?.mute(muteValue)
                 zedAudioPlayer?.start()
             }
         })
@@ -171,6 +174,18 @@ class ZedAudioActivity : AppCompatActivity() {
 
             }
         })
+        mute_left.setOnClickListener {
+            zedAudioPlayer?.mute(ZedMuteEnum.MUTE_LEFT.muteValue)
+            muteValue = ZedMuteEnum.MUTE_LEFT.muteValue
+        }
+        mute_right.setOnClickListener {
+            zedAudioPlayer?.mute(ZedMuteEnum.MUTE_RIGHT.muteValue)
+            muteValue = ZedMuteEnum.MUTE_RIGHT.muteValue
+        }
+        mute_center.setOnClickListener {
+            zedAudioPlayer?.mute(ZedMuteEnum.MUTE_CENTER.muteValue)
+            muteValue = ZedMuteEnum.MUTE_CENTER.muteValue
+        }
     }
 
     override fun onDestroy() {

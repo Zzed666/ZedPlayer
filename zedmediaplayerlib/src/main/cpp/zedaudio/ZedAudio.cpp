@@ -74,13 +74,13 @@ void ZedAudio::prepareOpenSELS() {
     SLDataLocator_OutputMix outputMix = {SL_DATALOCATOR_OUTPUTMIX, mixoutObj};
     SLDataSource pAudioSrc = {&bufferQueue, &dataFormatPcm};
     SLDataSink pAudioSnk = {&outputMix, 0};
-    const SLInterfaceID playItfs[2] = {SL_IID_BUFFERQUEUE, SL_IID_VOLUME};
-    const SLboolean playBools[2] = {SL_BOOLEAN_TRUE, SL_BOOLEAN_TRUE};
+    const SLInterfaceID playItfs[3] = {SL_IID_BUFFERQUEUE, SL_IID_VOLUME, SL_IID_MUTESOLO};
+    const SLboolean playBools[3] = {SL_BOOLEAN_TRUE, SL_BOOLEAN_TRUE, SL_BOOLEAN_TRUE};
     (*engineEngine)->CreateAudioPlayer(engineEngine,
                                        &playObj,
                                        &pAudioSrc,
                                        &pAudioSnk,
-                                       2,
+                                       3,
                                        playItfs,
                                        playBools);
     (*playObj)->Realize(playObj, SL_BOOLEAN_FALSE);
@@ -88,6 +88,9 @@ void ZedAudio::prepareOpenSELS() {
     //设置音量
     (*playObj)->GetInterface(playObj, SL_IID_VOLUME, &volumeVolume);
     volume(volume_init);
+    //设置声道
+    (*playObj)->GetInterface(playObj, SL_IID_MUTESOLO, &muteMute);
+    mute(mute_init);
     //设置缓冲队列和回调函数
     (*playObj)->GetInterface(playObj, SL_IID_BUFFERQUEUE, &androidSimpleBufferQueue);
     (*androidSimpleBufferQueue)->RegisterCallback(androidSimpleBufferQueue,
@@ -218,6 +221,37 @@ void ZedAudio::volume(int percent) {
             (*volumeVolume)->SetVolumeLevel(volumeVolume, (100 - percent) * -40);
         } else {
             (*volumeVolume)->SetVolumeLevel(volumeVolume, (100 - percent) * -100);
+        }
+    }
+}
+
+void ZedAudio::mute(int mute_channel) {
+    mute_init = mute_channel;
+    if (muteMute != nullptr) {
+        if (FFMPEG_LOG) {
+            FFLOGI("audio mute_channel is : %d", mute_channel);
+        }
+        if (mute_channel == 0) {//right
+            (*muteMute)->SetChannelMute(muteMute,
+                                        0,
+                                        true);
+            (*muteMute)->SetChannelMute(muteMute,
+                                        1,
+                                        false);
+        } else if (mute_channel == 1) {//left
+            (*muteMute)->SetChannelMute(muteMute,
+                                        0,
+                                        false);
+            (*muteMute)->SetChannelMute(muteMute,
+                                        1,
+                                        true);
+        } else if (mute_channel == 2) {//center
+            (*muteMute)->SetChannelMute(muteMute,
+                                        0,
+                                        false);
+            (*muteMute)->SetChannelMute(muteMute,
+                                        1,
+                                        false);
         }
     }
 }

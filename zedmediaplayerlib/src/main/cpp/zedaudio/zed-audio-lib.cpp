@@ -109,6 +109,20 @@ Java_com_github_zedmediaplayerlib_audio_ZedAudioPlayer_n_1volume(JNIEnv *env,
     }
 }
 
+extern "C" JNIEXPORT void JNICALL
+Java_com_github_zedmediaplayerlib_audio_ZedAudioPlayer_n_1mute(JNIEnv *env,
+                                                               jobject obj,
+                                                               jint mute_channel) {
+    if (zedFfmpeg != nullptr) {
+        zedFfmpeg->muteAudio(mute_channel);
+    } else {
+        if (FFMPEG_LOG) {
+            FFLOGE("ffmpeg mute return because of it isn't initial!")
+            return;
+        }
+    }
+}
+
 extern "C" JNIEXPORT jint JNICALL
 Java_com_github_zedmediaplayerlib_audio_ZedAudioPlayer_n_1duration(JNIEnv *env,
                                                                jobject obj) {
