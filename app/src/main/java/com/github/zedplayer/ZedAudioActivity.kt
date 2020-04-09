@@ -24,6 +24,8 @@ class ZedAudioActivity : AppCompatActivity() {
     var isSeekBar: Boolean = false
     var volumeValue = 50
     var muteValue = ZedMuteEnum.MUTE_CENTER.muteValue
+    var speedValue = 1.0f
+    var pitchValue = 1.0f
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_zed_audio)
@@ -48,6 +50,8 @@ class ZedAudioActivity : AppCompatActivity() {
         zedAudioPlayer?.setOnPrepareListener(object : OnPreparedListener {
             override fun onPrepared() {
                 Log.i("zzed", "media is prepared to play")
+                zedAudioPlayer?.speed(speedValue)
+                zedAudioPlayer?.pitch(pitchValue)
                 zedAudioPlayer?.volume(volumeValue)
                 zedAudioPlayer?.mute(muteValue)
                 zedAudioPlayer?.start()
@@ -126,12 +130,13 @@ class ZedAudioActivity : AppCompatActivity() {
             zedAudioPlayer?.stop()
         }
         next.setOnClickListener {
-            zedAudioPlayer?.next(
-                File(
-                    Environment.getExternalStorageDirectory(),
-                    "告白の夜.mp3"
-                ).absolutePath
-            )
+            //            zedAudioPlayer?.next(
+//                File(
+//                    Environment.getExternalStorageDirectory(),
+//                    "告白の夜.mp3"
+//                ).absolutePath
+//            )
+            zedAudioPlayer?.next("http://fs.ios.kugou.com/202004081812/0e04e838581dc062524a27dec6c5a7b3/G151/M07/0E/19/d5QEAFz2MN-AJrB_ALDykLp1gS4802.mp3")
         }
         seek_bar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
@@ -185,6 +190,30 @@ class ZedAudioActivity : AppCompatActivity() {
         mute_center.setOnClickListener {
             zedAudioPlayer?.mute(ZedMuteEnum.MUTE_CENTER.muteValue)
             muteValue = ZedMuteEnum.MUTE_CENTER.muteValue
+        }
+        speed_half.setOnClickListener {
+            zedAudioPlayer?.speed(0.5f)
+            speedValue = 0.5f
+        }
+        speed_original.setOnClickListener {
+            zedAudioPlayer?.speed(1.0f)
+            speedValue = 1.0f
+        }
+        speed_one_and_half.setOnClickListener {
+            zedAudioPlayer?.speed(1.5f)
+            speedValue = 1.5f
+        }
+        pitch_half.setOnClickListener {
+            zedAudioPlayer?.pitch(0.5f)
+            pitchValue = 0.5f
+        }
+        pitch_original.setOnClickListener {
+            zedAudioPlayer?.pitch(1.0f)
+            pitchValue = 1.0f
+        }
+        pitch_one_and_half.setOnClickListener {
+            zedAudioPlayer?.pitch(1.5f)
+            pitchValue = 1.5f
         }
     }
 

@@ -13,7 +13,7 @@
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        android:layout_marginTop="20dp"/>
+        android:layout_marginTop="10dp"/>
 
     <Button
         android:id="@+id/pause"
@@ -23,7 +23,7 @@
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/prepare"
-        android:layout_marginTop="20dp"/>
+        android:layout_marginTop="10dp"/>
 
     <Button
         android:id="@+id/resume"
@@ -33,7 +33,7 @@
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/pause"
-        android:layout_marginTop="20dp"/>
+        android:layout_marginTop="10dp"/>
 
     <Button
         android:id="@+id/stop"
@@ -43,7 +43,7 @@
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/resume"
-        android:layout_marginTop="20dp"/>
+        android:layout_marginTop="10dp"/>
 
     <!--<Button
         android:id="@+id/seek"
@@ -63,7 +63,7 @@
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/stop"
-        android:layout_marginTop="20dp"/>
+        android:layout_marginTop="10dp"/>
 
     <TextView
         android:id="@+id/play_time"
@@ -71,7 +71,7 @@
         android:layout_height="wrap_content"
         android:layout_marginLeft="20dp"
         android:layout_marginStart="20dp"
-        android:layout_marginTop="30dp"
+        android:layout_marginTop="20dp"
         android:text="00:00/00:00"
         android:textSize="18sp"
         app:layout_constraintLeft_toLeftOf="parent"
@@ -85,7 +85,7 @@
         android:layout_marginStart="20dp"
         android:layout_marginRight="20dp"
         android:layout_marginEnd="20dp"
-        android:layout_marginTop="30dp"
+        android:layout_marginTop="20dp"
         android:textSize="18sp"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
@@ -97,7 +97,7 @@
         android:layout_height="wrap_content"
         android:layout_marginLeft="20dp"
         android:layout_marginStart="20dp"
-        android:layout_marginTop="30dp"
+        android:layout_marginTop="20dp"
         android:text="音量:0%"
         android:textSize="18sp"
         app:layout_constraintLeft_toLeftOf="parent"
@@ -111,7 +111,7 @@
         android:layout_marginStart="20dp"
         android:layout_marginRight="20dp"
         android:layout_marginEnd="20dp"
-        android:layout_marginTop="30dp"
+        android:layout_marginTop="20dp"
         android:textSize="18sp"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
@@ -123,7 +123,7 @@
         android:layout_height="wrap_content"
         android:layout_marginLeft="20dp"
         android:layout_marginStart="20dp"
-        android:layout_marginTop="30dp"
+        android:layout_marginTop="20dp"
         android:text="LeftMute"
         android:textSize="12sp"
         app:layout_constraintLeft_toLeftOf="parent"
@@ -133,7 +133,7 @@
         android:id="@+id/mute_center"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="30dp"
+        android:layout_marginTop="20dp"
         android:text="CenterMute"
         android:textSize="12sp"
         app:layout_constraintLeft_toLeftOf="parent"
@@ -146,10 +146,80 @@
         android:layout_height="wrap_content"
         android:layout_marginRight="20dp"
         android:layout_marginEnd="20dp"
-        android:layout_marginTop="30dp"
+        android:layout_marginTop="20dp"
         android:text="RightMute"
         android:textSize="12sp"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/volume_bar" />
+
+    <Button
+        android:id="@+id/speed_half"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="20dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="10dp"
+        android:text="0.5speed"
+        android:textSize="10sp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/mute_right" />
+
+    <Button
+        android:id="@+id/speed_original"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:text="1.0speed"
+        android:textSize="10sp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/mute_right" />
+
+    <Button
+        android:id="@+id/speed_one_and_half"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginRight="20dp"
+        android:layout_marginEnd="20dp"
+        android:layout_marginTop="10dp"
+        android:text="1.5speed"
+        android:textSize="10sp"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/mute_right" />
+
+    <Button
+        android:id="@+id/pitch_half"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="20dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="10dp"
+        android:text="0.5pitch"
+        android:textSize="10sp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/speed_one_and_half" />
+
+    <Button
+        android:id="@+id/pitch_original"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:text="1.0pitch"
+        android:textSize="10sp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/speed_one_and_half" />
+
+    <Button
+        android:id="@+id/pitch_one_and_half"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginRight="20dp"
+        android:layout_marginEnd="20dp"
+        android:layout_marginTop="10dp"
+        android:text="1.5pitch"
+        android:textSize="10sp"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/speed_one_and_half" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

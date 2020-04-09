@@ -123,6 +123,34 @@ Java_com_github_zedmediaplayerlib_audio_ZedAudioPlayer_n_1mute(JNIEnv *env,
     }
 }
 
+extern "C" JNIEXPORT void JNICALL
+Java_com_github_zedmediaplayerlib_audio_ZedAudioPlayer_n_1speed(JNIEnv *env,
+                                                               jobject obj,
+                                                               jfloat speed) {
+    if (zedFfmpeg != nullptr) {
+        zedFfmpeg->speedAudio(speed);
+    } else {
+        if (FFMPEG_LOG) {
+            FFLOGE("ffmpeg speed return because of it isn't initial!")
+            return;
+        }
+    }
+}
+
+extern "C" JNIEXPORT void JNICALL
+Java_com_github_zedmediaplayerlib_audio_ZedAudioPlayer_n_1pitch(JNIEnv *env,
+                                                               jobject obj,
+                                                                jfloat pitch) {
+    if (zedFfmpeg != nullptr) {
+        zedFfmpeg->pitchAudio(pitch);
+    } else {
+        if (FFMPEG_LOG) {
+            FFLOGE("ffmpeg pitch return because of it isn't initial!")
+            return;
+        }
+    }
+}
+
 extern "C" JNIEXPORT jint JNICALL
 Java_com_github_zedmediaplayerlib_audio_ZedAudioPlayer_n_1duration(JNIEnv *env,
                                                                jobject obj) {

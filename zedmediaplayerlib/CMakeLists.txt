@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.4.1)
 
-include_directories(${CMAKE_SOURCE_DIR}/libs/include)
+include_directories(${CMAKE_SOURCE_DIR}/libs/include
+
+        src/main/cpp/soundtouch/include)
 
 add_library(avcodec
 
@@ -65,7 +67,36 @@ add_library(jni-lib
 
         src/main/cpp/queues/ZedQueue.cpp
 
-        src/main/cpp/status/ZedStatus.cpp)
+        src/main/cpp/status/ZedStatus.cpp
+
+
+        src/main/cpp/soundtouch/source/AAFilter.cpp
+
+        src/main/cpp/soundtouch/source/BPMDetect.cpp
+
+        src/main/cpp/soundtouch/source/cpu_detect_x86.cpp
+
+        src/main/cpp/soundtouch/source/FIFOSampleBuffer.cpp
+
+        src/main/cpp/soundtouch/source/FIRFilter.cpp
+
+        src/main/cpp/soundtouch/source/InterpolateCubic.cpp
+
+        src/main/cpp/soundtouch/source/InterpolateLinear.cpp
+
+        src/main/cpp/soundtouch/source/InterpolateShannon.cpp
+
+        src/main/cpp/soundtouch/source/mmx_optimized.cpp
+
+        src/main/cpp/soundtouch/source/PeakFinder.cpp
+
+        src/main/cpp/soundtouch/source/RateTransposer.cpp
+
+        src/main/cpp/soundtouch/source/SoundTouch.cpp
+
+        src/main/cpp/soundtouch/source/sse_optimized.cpp
+
+        src/main/cpp/soundtouch/source/TDStretch.cpp)
 
 set_target_properties(
         avcodec

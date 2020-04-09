@@ -10,6 +10,17 @@ ZedAudio::ZedAudio(ZedStatus *zedStatus, CCallJava *cCallJava, int sample_rate) 
     this->sample_rate = sample_rate;
     zedQueue = new ZedQueue(zedStatus);
     out_buffer = (uint8_t *) (av_malloc(sample_rate * 2 * 2));
+
+    soundTouch = new SoundTouch();
+    //soundtouch设置采样率
+    soundTouch->setSampleRate(sample_rate);
+    //soundtouch设置声道数
+    soundTouch->setChannels(2);
+    //给soundtouch samplebuffer分配空间
+    sound_touch_buffer_16bit = (SAMPLETYPE *) (av_malloc(sample_rate * 2 * 2));
+    //soundtouch设置初始的speed和pitch
+    soundTouch->setTempo(speed_init);
+    soundTouch->setPitch(pitch_init);
 }
 
 void *playThreadCallBack(void *data) {
@@ -21,7 +32,7 @@ void *playThreadCallBack(void *data) {
 void openSLESBufferQueueCallBack(SLAndroidSimpleBufferQueueItf bufferQueueItf, void *context) {
     auto *zedAudio = (ZedAudio *) context;
     if (zedAudio != nullptr) {
-        int size = zedAudio->resample();
+        int size = zedAudio->getSoundTouchData();
         zedAudio->clock_time += size / (zedAudio->sample_rate * 2 * 2);
         if (zedAudio->clock_time - zedAudio->last_time >= 0.1) {
             zedAudio->last_time = zedAudio->clock_time;
@@ -31,8 +42,8 @@ void openSLESBufferQueueCallBack(SLAndroidSimpleBufferQueueItf bufferQueueItf, v
         //将重采样后的数据压入OpenSLES中的播放队列中
         if (size > 0) {
             (*zedAudio->androidSimpleBufferQueue)->Enqueue(zedAudio->androidSimpleBufferQueue,
-                                                           zedAudio->out_buffer,
-                                                           size);
+                                                           zedAudio->sound_touch_buffer_16bit,
+                                                           size * 2 * 2);
         }
     }
 }
@@ -101,6 +112,51 @@ void ZedAudio::prepareOpenSELS() {
     openSLESBufferQueueCallBack(androidSimpleBufferQueue, this);
 }
 
+int ZedAudio::getSoundTouchData() {
+    while (zedStatus != nullptr && !zedStatus->exit) {
+        /**
+             * FFmpge解码出来的pcm数据是8bit的(uint8),而SoundTouch中最低的是16bit的(16 bit integer samples),所以我们需要将8bit转换成16bit再交给SoundTouch处理
+             * 由于PCM数据在内存中是顺序排列的,所以先将第一个8bit的数据复制到16bit内存的前8位
+             * 然后后8bit的数据复制到16bit内存中的后8bit,就能把16bit的内存填满
+             * 然后循环复制。(循环次数为data_size/2 + 1,+1是因为有除不尽的情况)
+             * 图解见res/drawable-hdpi/bit8_revert_bit16.jpg
+             * */
+        int sound_touch_sample_size = 0;
+        sound_touch_buffer_8bit = nullptr;
+
+        if (sound_touch_sample_finished) {
+            sound_touch_sample_finished = false;
+            int sampleSize = resample();
+            if (sampleSize > 0) {
+                for (int i = 0; i < sampleSize; i++) {
+                    sound_touch_buffer_16bit[i] = sound_touch_buffer_8bit[i * 2] |
+                                                  sound_touch_buffer_8bit[i * 2 + 1] << 8;
+                }
+                soundTouch->putSamples(sound_touch_buffer_16bit, resample_nbs);
+                sound_touch_sample_size = soundTouch->receiveSamples(sound_touch_buffer_16bit,
+                                                                     sampleSize / 2 / 2);
+            } else {
+                soundTouch->flush();
+            }
+            if (sound_touch_sample_size == 0) {
+                sound_touch_sample_finished = true;
+                continue;
+            } else {
+                if (sound_touch_buffer_8bit == nullptr) {
+                    sound_touch_sample_size = soundTouch->receiveSamples(sound_touch_buffer_16bit,
+                                                                         sampleSize / 2 / 2);
+                    if (sound_touch_sample_size == 0) {
+                        sound_touch_sample_finished = true;
+                        continue;
+                    }
+                }
+                return sound_touch_sample_size;
+            }
+        }
+    }
+    return 0;
+}
+
 int ZedAudio::resample() {
     int ret = -1;
     int resample_size = 0;
@@ -159,10 +215,10 @@ int ZedAudio::resample() {
             releaseTempSource();
             continue;
         }
-        int nbs = swr_convert(pSwrCtx, &out_buffer, pAvFrame->nb_samples,
-                              (const uint8_t **) (pAvFrame->data), pAvFrame->nb_samples);
+        resample_nbs = swr_convert(pSwrCtx, &out_buffer, pAvFrame->nb_samples,
+                                   (const uint8_t **) (pAvFrame->data), pAvFrame->nb_samples);
         int channels = av_get_channel_layout_nb_channels(AV_CH_LAYOUT_STEREO);
-        resample_size = nbs * channels * av_get_bytes_per_sample(AV_SAMPLE_FMT_S16);
+        resample_size = resample_nbs * channels * av_get_bytes_per_sample(AV_SAMPLE_FMT_S16);
         if (FFMPEG_LOG) {
             FFLOGI("resample:resample_size is %d", resample_size);
         }
@@ -171,6 +227,7 @@ int ZedAudio::resample() {
             now_time = clock_time;
         }
         clock_time = now_time;
+        sound_touch_buffer_8bit = out_buffer;
         releaseTempSource();
         break;
     }
@@ -256,6 +313,20 @@ void ZedAudio::mute(int mute_channel) {
     }
 }
 
+void ZedAudio::speed(float audio_speed) {
+    speed_init = audio_speed;
+    if(soundTouch != nullptr){
+        soundTouch->setTempo(audio_speed);
+    }
+}
+
+void ZedAudio::pitch(float audio_pitch) {
+    pitch_init = audio_pitch;
+    if(soundTouch != nullptr){
+        soundTouch->setPitch(audio_pitch);
+    }
+}
+
 int ZedAudio::getCurrentSampleRate(int sample_rate) {
     int rate = 0;
     switch (sample_rate) {
@@ -327,6 +398,10 @@ void ZedAudio::release() {
         delete (zedQueue);
         zedQueue = nullptr;
     }
+    if (soundTouch != nullptr) {
+        delete (soundTouch);
+        soundTouch = nullptr;
+    }
     if (playObj != nullptr) {
         (*playObj)->Destroy(playObj);
         playObj = nullptr;
@@ -346,6 +421,14 @@ void ZedAudio::release() {
     if (out_buffer != nullptr) {
         free(out_buffer);
         out_buffer = nullptr;
+    }
+    if (sound_touch_buffer_8bit != nullptr) {
+        free(sound_touch_buffer_8bit);
+        sound_touch_buffer_8bit = nullptr;
+    }
+    if (sound_touch_buffer_16bit != nullptr) {
+        free(sound_touch_buffer_16bit);
+        sound_touch_buffer_16bit = nullptr;
     }
     if (pAvCodecCtx != nullptr) {
         avcodec_close(pAvCodecCtx);

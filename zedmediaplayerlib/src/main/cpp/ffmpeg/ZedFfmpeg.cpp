@@ -232,6 +232,18 @@ void ZedFfmpeg::muteAudio(int mute_channel) {
     }
 }
 
+void ZedFfmpeg::speedAudio(float audio_speed) {
+    if (zedAudio != nullptr) {
+        zedAudio->speed(audio_speed);
+    }
+}
+
+void ZedFfmpeg::pitchAudio(float audio_pitch) {
+    if (zedAudio != nullptr) {
+        zedAudio->pitch(audio_pitch);
+    }
+}
+
 void ZedFfmpeg::stopAudio() {
 //    //为了防止av_read_frame = 0之后，判断getPacketSize = 0，zedStatus->exit设置为true的时候再调用stopAudio会直接return，所以这段注释掉
 //    if (zedStatus->exit) {

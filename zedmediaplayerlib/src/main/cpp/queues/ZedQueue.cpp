@@ -15,7 +15,7 @@ void ZedQueue::putPackets(AVPacket *avPacket) {
     zedQueue.push(avPacket);
     pthread_cond_signal(&decode_thread_cond);
     if (FFMPEG_LOG) {
-        FFLOGI("解码一帧放入队列中,队列还有%d帧数据", zedQueue.size())
+        FFLOGI("解码一帧放入队列中,队列还有%d帧数据", zedQueue.size());
     }
     pthread_mutex_unlock(&decode_thread_mutex);
 }

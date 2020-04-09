@@ -32,6 +32,8 @@ public:
     void seekAudio(int64_t seek_time);
     void volumeAudio(int volume_percent);
     void muteAudio(int mute);
+    void speedAudio(float speed);
+    void pitchAudio(float pitch);
     void stopAudio();
     void release();
 };
