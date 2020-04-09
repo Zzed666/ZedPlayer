@@ -121,37 +121,38 @@ int ZedAudio::getSoundTouchData() {
              * 然后循环复制。(循环次数为data_size/2 + 1,+1是因为有除不尽的情况)
              * 图解见res/drawable-hdpi/bit8_revert_bit16.jpg
              * */
+        int original_resample_size = 0;
         int sound_touch_sample_size = 0;
         sound_touch_buffer_8bit = nullptr;
 
         if (sound_touch_sample_finished) {
             sound_touch_sample_finished = false;
-            int sampleSize = resample();
-            if (sampleSize > 0) {
-                for (int i = 0; i < sampleSize; i++) {
-                    sound_touch_buffer_16bit[i] = sound_touch_buffer_8bit[i * 2] |
-                                                  sound_touch_buffer_8bit[i * 2 + 1] << 8;
+            original_resample_size = resample();
+            if (original_resample_size > 0) {
+                for (int i = 0; i < original_resample_size; i++) {
+                    sound_touch_buffer_16bit[i] = (sound_touch_buffer_8bit[i * 2] |
+                                                   (sound_touch_buffer_8bit[i * 2 + 1] << 8));
                 }
                 soundTouch->putSamples(sound_touch_buffer_16bit, resample_nbs);
                 sound_touch_sample_size = soundTouch->receiveSamples(sound_touch_buffer_16bit,
-                                                                     sampleSize / 2 / 2);
+                                                                     original_resample_size / 2 / 2);
             } else {
                 soundTouch->flush();
             }
-            if (sound_touch_sample_size == 0) {
-                sound_touch_sample_finished = true;
-                continue;
-            } else {
-                if (sound_touch_buffer_8bit == nullptr) {
-                    sound_touch_sample_size = soundTouch->receiveSamples(sound_touch_buffer_16bit,
-                                                                         sampleSize / 2 / 2);
-                    if (sound_touch_sample_size == 0) {
-                        sound_touch_sample_finished = true;
-                        continue;
-                    }
+        }
+        if (sound_touch_sample_size == 0) {
+            sound_touch_sample_finished = true;
+            continue;
+        } else {
+            if (sound_touch_buffer_8bit == nullptr) {
+                sound_touch_sample_size = soundTouch->receiveSamples(sound_touch_buffer_16bit,
+                                                                     original_resample_size / 2 / 2);
+                if (sound_touch_sample_size == 0) {
+                    sound_touch_sample_finished = true;
+                    continue;
                 }
-                return sound_touch_sample_size;
             }
+            return sound_touch_sample_size;
         }
     }
     return 0;
@@ -315,14 +316,20 @@ void ZedAudio::mute(int mute_channel) {
 
 void ZedAudio::speed(float audio_speed) {
     speed_init = audio_speed;
-    if(soundTouch != nullptr){
+    if (soundTouch != nullptr) {
+        if (FFMPEG_LOG) {
+            FFLOGI("resample:audio_speed is %d", audio_speed);
+        }
         soundTouch->setTempo(audio_speed);
     }
 }
 
 void ZedAudio::pitch(float audio_pitch) {
     pitch_init = audio_pitch;
-    if(soundTouch != nullptr){
+    if (soundTouch != nullptr) {
+        if (FFMPEG_LOG) {
+            FFLOGI("resample:audio_pitch is %d", audio_pitch);
+        }
         soundTouch->setPitch(audio_pitch);
     }
 }
@@ -398,10 +405,10 @@ void ZedAudio::release() {
         delete (zedQueue);
         zedQueue = nullptr;
     }
-    if (soundTouch != nullptr) {
-        delete (soundTouch);
-        soundTouch = nullptr;
-    }
+//    if (soundTouch != nullptr) {
+//        delete (soundTouch);
+//        soundTouch = nullptr;
+//    }
     if (playObj != nullptr) {
         (*playObj)->Destroy(playObj);
         playObj = nullptr;
@@ -422,14 +429,14 @@ void ZedAudio::release() {
         free(out_buffer);
         out_buffer = nullptr;
     }
-    if (sound_touch_buffer_8bit != nullptr) {
-        free(sound_touch_buffer_8bit);
-        sound_touch_buffer_8bit = nullptr;
-    }
-    if (sound_touch_buffer_16bit != nullptr) {
-        free(sound_touch_buffer_16bit);
-        sound_touch_buffer_16bit = nullptr;
-    }
+//    if (sound_touch_buffer_8bit != nullptr) {
+////        free(sound_touch_buffer_8bit);
+//        sound_touch_buffer_8bit = nullptr;
+//    }
+//    if (sound_touch_buffer_16bit != nullptr) {
+////        free(sound_touch_buffer_16bit);
+//        sound_touch_buffer_16bit = nullptr;
+//    }
     if (pAvCodecCtx != nullptr) {
         avcodec_close(pAvCodecCtx);
         avcodec_free_context(&pAvCodecCtx);
