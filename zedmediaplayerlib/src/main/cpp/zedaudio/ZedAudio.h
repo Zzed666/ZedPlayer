@@ -60,6 +60,7 @@ public:
     ~ZedAudio();
     void prepareOpenSELS();
     int getSoundTouchData();
+    int getDB(char *pcm_data, size_t data_size);
     int resample();
     void play();
     void pause(bool is_pause);

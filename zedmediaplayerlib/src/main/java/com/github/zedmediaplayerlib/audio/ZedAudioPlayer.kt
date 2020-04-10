@@ -9,6 +9,7 @@ class ZedAudioPlayer {
     private var onSeekListener: OnSeekListener? = null
     private var onStopListener: OnStopListener? = null
     private var onPlayTimeListener: OnPlayTimeListener? = null
+    private var onDBListener: OnDBListener? = null
     private var onErrorListener: OnErrorListener? = null
     private var onCompleteListener: OnCompleteListener? = null
 
@@ -131,6 +132,16 @@ class ZedAudioPlayer {
         onPlayTimeListener?.onPlayTime(totalTime, currentTime)
     }
     /**-------------------------------------------play time---------------------------------------*/
+
+    /**-------------------------------------------db---------------------------------------*/
+    fun setOnDBListener(onDBListener: OnDBListener) {
+        this.onDBListener = onDBListener
+    }
+
+    fun cCallDBBack(db: Int) {
+        onDBListener?.onDB(db)
+    }
+    /**-------------------------------------------db---------------------------------------*/
 
     /**-------------------------------------------volume---------------------------------------*/
     fun volume(volumePercent: Int) {

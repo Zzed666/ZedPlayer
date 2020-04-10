@@ -98,6 +98,11 @@ class ZedAudioActivity : AppCompatActivity() {
                 })
             }
         })
+        zedAudioPlayer?.setOnDBListener(object : OnDBListener {
+            override fun onDB(db: Int) {
+                Log.i("zzed", "media db is $db")
+            }
+        })
         zedAudioPlayer?.setOnErrorListener(object : OnErrorListener {
             override fun onError(errorCode: Int, errorMsg: String) {
                 Log.e("zzed", "media error,error code is $errorCode,error message is $errorMsg!")
@@ -110,12 +115,13 @@ class ZedAudioActivity : AppCompatActivity() {
             }
         })
         prepare.setOnClickListener {
-            zedAudioPlayer?.prepared(
-                File(
-                    Environment.getExternalStorageDirectory(),
-                    "Yasuo.mp3"
-                ).absolutePath
-            )
+            //            zedAudioPlayer?.prepared(
+//                File(
+//                    Environment.getExternalStorageDirectory(),
+//                    "Yasuo.mp3"
+//                ).absolutePath
+//            )
+            zedAudioPlayer?.prepared("http://fs.ios.kugou.com/202004101153/93a93051133616d6866fc9557cce9118/G153/M04/13/14/OYcBAFz3fF6AbF0fADS_2OPt0ag626.mp3")
         }
         pause.setOnClickListener {
             zedAudioPlayer?.pause(true)
@@ -136,7 +142,7 @@ class ZedAudioActivity : AppCompatActivity() {
 //                    "告白の夜.mp3"
 //                ).absolutePath
 //            )
-            zedAudioPlayer?.next("http://fs.ios.kugou.com/202004081812/0e04e838581dc062524a27dec6c5a7b3/G151/M07/0E/19/d5QEAFz2MN-AJrB_ALDykLp1gS4802.mp3")
+            zedAudioPlayer?.next("http://fs.ios.kugou.com/202004101026/7443d218bdfccf501004e288efeb8485/G151/M07/0E/19/d5QEAFz2MN-AJrB_ALDykLp1gS4802.mp3")
         }
         seek_bar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
@@ -146,11 +152,13 @@ class ZedAudioActivity : AppCompatActivity() {
                     .subscribe { totalDuration ->
                         if (totalDuration >= 0 && isSeekBar) {
                             position = totalDuration * progress / 100
-                        } else Toast.makeText(
-                            this@ZedAudioActivity,
-                            "media source isn't prepare!",
-                            Toast.LENGTH_SHORT
-                        ).show()
+                        } else if (totalDuration < 0) {
+                            Toast.makeText(
+                                this@ZedAudioActivity,
+                                "media source isn't prepare!",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
                     })
             }
 

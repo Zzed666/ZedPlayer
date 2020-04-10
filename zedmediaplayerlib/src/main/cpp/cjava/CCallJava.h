@@ -21,6 +21,7 @@ public:
     jmethodID jloadmid = nullptr;
     jmethodID jpreparemid = nullptr;
     jmethodID jplaytimemid = nullptr;
+    jmethodID jdbmid = nullptr;
     jmethodID jpausemid = nullptr;
     jmethodID jseekmid = nullptr;
     jmethodID jstopmid = nullptr;
@@ -32,6 +33,7 @@ public:
     void callOnLoad(int cType, bool load);
     void callOnPrepare(int cType);
     void callOnPlayTime(int cType, int total, int current);
+    void callOnDB(int cType, int db);
     void callOnPause(int cType, bool pause);
     void callOnSeek(int cType, int total, int seek);
     void callOnStop(int cType);

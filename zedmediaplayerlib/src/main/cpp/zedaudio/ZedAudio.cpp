@@ -39,6 +39,8 @@ void openSLESBufferQueueCallBack(SLAndroidSimpleBufferQueueItf bufferQueueItf, v
         }
         zedAudio->cCallJava->callOnPlayTime(CTHREADTYPE_CHILD, zedAudio->total_duration,
                                             zedAudio->clock_time);
+        zedAudio->cCallJava->callOnDB(CTHREADTYPE_CHILD, zedAudio->getDB(
+                reinterpret_cast<char *>(zedAudio->sound_touch_buffer_16bit), size * 2 * 2));
         //将重采样后的数据压入OpenSLES中的播放队列中
         if (size > 0) {
             (*zedAudio->androidSimpleBufferQueue)->Enqueue(zedAudio->androidSimpleBufferQueue,
@@ -135,7 +137,8 @@ int ZedAudio::getSoundTouchData() {
                 }
                 soundTouch->putSamples(sound_touch_buffer_16bit, resample_nbs);
                 sound_touch_sample_size = soundTouch->receiveSamples(sound_touch_buffer_16bit,
-                                                                     original_resample_size / 2 / 2);
+                                                                     original_resample_size / 2 /
+                                                                     2);
             } else {
                 soundTouch->flush();
             }
@@ -146,7 +149,8 @@ int ZedAudio::getSoundTouchData() {
         } else {
             if (sound_touch_buffer_8bit == nullptr) {
                 sound_touch_sample_size = soundTouch->receiveSamples(sound_touch_buffer_16bit,
-                                                                     original_resample_size / 2 / 2);
+                                                                     original_resample_size / 2 /
+                                                                     2);
                 if (sound_touch_sample_size == 0) {
                     sound_touch_sample_finished = true;
                     continue;
@@ -156,6 +160,27 @@ int ZedAudio::getSoundTouchData() {
         }
     }
     return 0;
+}
+
+int ZedAudio::getDB(char *pcm_data, size_t data_size) {
+    /**
+     * 将一段时间的分贝值求和再求平均值得到平均的分贝值
+     * 16bit=2byte=2char，在c语言中是用short int表示，将16bit提取前2个char转化成short int就可以了，然后相加求平均值
+     * */
+    int db = 0;
+    short int previous_value = 0;
+    double sum = 0;
+    for (int i = 0; i < data_size; i += 2) {
+        memcpy(&previous_value, pcm_data + i, 2);
+        sum += abs(previous_value);
+    }
+    if (sum > 0) {
+        sum = sum / (data_size / 2);
+        db = (int) 20.0 * log10(sum);
+    }
+    //todo db < 0
+    db = db < 0 ? 0 : db;
+    return db;
 }
 
 int ZedAudio::resample() {
