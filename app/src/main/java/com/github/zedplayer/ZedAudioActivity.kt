@@ -234,6 +234,15 @@ class ZedAudioActivity : AppCompatActivity() {
                 )
             )
         }
+        pause_record.setOnClickListener {
+            zedAudioPlayer?.pauseRecord()
+        }
+        resume_record.setOnClickListener {
+            zedAudioPlayer?.resumeRecord()
+        }
+        stop_record.setOnClickListener {
+            zedAudioPlayer?.stopRecord()
+        }
     }
 
     override fun onDestroy() {

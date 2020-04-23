@@ -43,6 +43,7 @@ class ZedAudioPlayer {
     private external fun n_mute(muteChannle: Int)
     private external fun n_speed(speed: Float)
     private external fun n_pitch(pitch: Float)
+    private external fun n_record(record: Boolean)
 
     /**-------------------------------------------load---------------------------------------*/
     fun setOnLoadListener(onLoadListener: OnLoadListener) {
@@ -117,6 +118,7 @@ class ZedAudioPlayer {
 
     fun stop() {
         Thread(Runnable {
+            stopRecord()
             n_stop(false, "")
         }).start()
     }
@@ -225,11 +227,28 @@ class ZedAudioPlayer {
     /**-------------------------------------------record---------------------------------------*/
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     fun startRecord(outFile: File) {
-        getSampleRate().takeIf { it > 0 }?.run {
+        getSampleRate().takeIf { it > 0 }?.let { sampleRate ->
             if (zedMediaHelper == null) {
                 zedMediaHelper = ZedMediaHelper()
             }
-            zedMediaHelper?.initMediaCodec(this, outFile)
+            zedMediaHelper?.takeIf { !it.isInitMediaCodec }?.run {
+                initMediaCodec(sampleRate, outFile)
+                n_record(true)
+            }
+        }
+    }
+
+    fun pauseRecord() {
+        n_record(false)
+    }
+
+    fun resumeRecord() {
+        n_record(true)
+    }
+
+    fun stopRecord() {
+        zedMediaHelper?.takeIf { it.isInitMediaCodec }?.run {
+            releaseMediaCodec()
         }
     }
 

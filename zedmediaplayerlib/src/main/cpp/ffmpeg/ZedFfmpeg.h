@@ -35,6 +35,7 @@ public:
     void muteAudio(int mute);
     void speedAudio(float speed);
     void pitchAudio(float pitch);
+    void recordAudio(bool record);
     void stopAudio();
     void release();
 };

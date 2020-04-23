@@ -25,6 +25,7 @@ public:
     int mute_init = 2;
     float speed_init = 1.0f;
     float pitch_init = 1.0f;
+    bool isrecord = false;
     uint8_t *out_buffer;
     AVRational audio_time_base;
 
@@ -69,6 +70,7 @@ public:
     void mute(int mute_channel);
     void speed(float audio_speed);
     void pitch(float audio_pitch);
+    void record(bool audio_record);
     int getCurrentSampleRate(int sample_rate);
     void releaseTempSource();
     void release();

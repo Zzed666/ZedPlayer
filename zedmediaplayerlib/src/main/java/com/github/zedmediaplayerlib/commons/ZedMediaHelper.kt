@@ -4,11 +4,13 @@ import android.media.MediaCodec
 import android.media.MediaCodecInfo
 import android.media.MediaFormat
 import android.os.Build
+import android.util.Log
 import androidx.annotation.RequiresApi
 import java.io.File
 import java.io.FileOutputStream
 
 class ZedMediaHelper {
+    var isInitMediaCodec: Boolean = false
     private var audioFormat: MediaFormat? = null
     private var audioEncoder: MediaCodec? = null
     private var audioOutputStream: FileOutputStream? = null
@@ -18,6 +20,8 @@ class ZedMediaHelper {
     private var outTempBuffer: ByteArray? = null
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     fun initMediaCodec(sampleRate: Int, outFile: File) {
+        Log.d("wszed","initMediaCodec")
+        isInitMediaCodec = true
         //创建audio_media_format
         audioFormat = MediaFormat.createAudioFormat(
             MediaFormat.MIMETYPE_AUDIO_AAC,
@@ -65,10 +69,32 @@ class ZedMediaHelper {
         }
     }
 
+    fun releaseMediaCodec() {
+        takeIf { it.isInitMediaCodec }?.run {
+            try {
+                audioOutputStream?.close()
+                audioOutputStream = null
+                audioEncoder?.stop()
+                audioEncoder?.release()
+                audioEncoder = null
+                audioFormat = null
+                bufferInfo = null
+                isInitMediaCodec = false
+                Log.d("wszed","releaseMediaCodec")
+            }catch (e: Exception){
+
+            }finally {
+                audioOutputStream?.close()
+                audioOutputStream = null
+            }
+        }
+    }
+
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     private fun encodeOutBuffer(encoder: MediaCodec) {
         encoder.dequeueOutputBuffer(bufferInfo!!, 0)
             .takeIf { outputBufferIndex -> outputBufferIndex >= 0 }?.let {
+                Log.d("wszed","encodeOutBuffer")
                 encoder.getOutputBuffer(it)?.run {
                     pcmBufferSize = bufferInfo!!.size + 7
                     outTempBuffer = ByteArray(pcmBufferSize)
