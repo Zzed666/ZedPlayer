@@ -16,6 +16,7 @@ class ZedAudioPlayer {
     private var onDBListener: OnDBListener? = null
     private var onErrorListener: OnErrorListener? = null
     private var onCompleteListener: OnCompleteListener? = null
+    private var onRecordListener: OnRecordListener? = null
 
     private var zedMediaHelper: ZedMediaHelper? = null
 
@@ -229,7 +230,7 @@ class ZedAudioPlayer {
     fun startRecord(outFile: File) {
         getSampleRate().takeIf { it > 0 }?.let { sampleRate ->
             if (zedMediaHelper == null) {
-                zedMediaHelper = ZedMediaHelper()
+                zedMediaHelper = ZedMediaHelper(onRecordListener)
             }
             zedMediaHelper?.takeIf { !it.isInitMediaCodec }?.run {
                 initMediaCodec(sampleRate, outFile)
@@ -248,8 +249,13 @@ class ZedAudioPlayer {
 
     fun stopRecord() {
         zedMediaHelper?.takeIf { it.isInitMediaCodec }?.run {
+            n_record(false)
             releaseMediaCodec()
         }
+    }
+
+    fun setOnOnRecordListener(onRecordListener: OnRecordListener) {
+        this.onRecordListener = onRecordListener
     }
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)

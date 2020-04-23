@@ -92,8 +92,11 @@ void ZedAudio::prepareOpenSELS() {
     SLDataLocator_OutputMix outputMix = {SL_DATALOCATOR_OUTPUTMIX, mixoutObj};
     SLDataSource pAudioSrc = {&bufferQueue, &dataFormatPcm};
     SLDataSink pAudioSnk = {&outputMix, 0};
-    const SLInterfaceID playItfs[3] = {SL_IID_BUFFERQUEUE, SL_IID_VOLUME, SL_IID_MUTESOLO};
-    const SLboolean playBools[3] = {SL_BOOLEAN_TRUE, SL_BOOLEAN_TRUE, SL_BOOLEAN_TRUE};
+    //解决不同采样率变调卡顿->SL_IID_PLAYBACKRATE
+    const SLInterfaceID playItfs[4] = {SL_IID_BUFFERQUEUE, SL_IID_VOLUME, SL_IID_MUTESOLO,
+                                       SL_IID_PLAYBACKRATE};
+    const SLboolean playBools[4] = {SL_BOOLEAN_TRUE, SL_BOOLEAN_TRUE, SL_BOOLEAN_TRUE,
+                                    SL_BOOLEAN_TRUE};
     (*engineEngine)->CreateAudioPlayer(engineEngine,
                                        &playObj,
                                        &pAudioSrc,

@@ -103,7 +103,7 @@ class ZedAudioActivity : AppCompatActivity() {
         })
         zedAudioPlayer?.setOnDBListener(object : OnDBListener {
             override fun onDB(db: Int) {
-                Log.i("zzed", "media db is $db")
+//                Log.i("zzed", "media db is $db")
             }
         })
         zedAudioPlayer?.setOnErrorListener(object : OnErrorListener {
@@ -115,6 +115,11 @@ class ZedAudioActivity : AppCompatActivity() {
             override fun onComplete() {
                 Log.i("zzed", "media play completely!")
                 zedAudioPlayer?.stop()
+            }
+        })
+        zedAudioPlayer?.setOnOnRecordListener(object : OnRecordListener{
+            override fun onRecord(time: Int) {
+                Log.i("zzed", "media record time is $time.")
             }
         })
         prepare.setOnClickListener {

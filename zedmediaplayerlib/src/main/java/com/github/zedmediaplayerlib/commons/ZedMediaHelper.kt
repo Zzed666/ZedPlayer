@@ -6,22 +6,26 @@ import android.media.MediaFormat
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
+import com.github.zedmediaplayerlib.audio.listener.OnRecordListener
 import java.io.File
 import java.io.FileOutputStream
 
-class ZedMediaHelper {
+class ZedMediaHelper(private var onRecordListener: OnRecordListener?) {
     var isInitMediaCodec: Boolean = false
     private var audioFormat: MediaFormat? = null
     private var audioEncoder: MediaCodec? = null
     private var audioOutputStream: FileOutputStream? = null
     private var bufferInfo: MediaCodec.BufferInfo? = null
     private var pcmBufferSize: Int = 0
-    private var aacSampleRate: Int = 4
+    private var audioSampleRate: Int = 0
+    private var audioRecordTime: Double = 0.0
     private var outTempBuffer: ByteArray? = null
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     fun initMediaCodec(sampleRate: Int, outFile: File) {
-        Log.d("wszed","initMediaCodec")
+        Log.d("wszed", "initMediaCodec")
         isInitMediaCodec = true
+        audioRecordTime = 0.0
+        audioSampleRate = sampleRate
         //创建audio_media_format
         audioFormat = MediaFormat.createAudioFormat(
             MediaFormat.MIMETYPE_AUDIO_AAC,
@@ -44,7 +48,6 @@ class ZedMediaHelper {
                     MediaCodec.CONFIGURE_FLAG_ENCODE
                 )
             }?.apply {
-                aacSampleRate = getAdtsSmapleRate(sampleRate)
                 audioOutputStream = FileOutputStream(outFile)
                 bufferInfo = MediaCodec.BufferInfo()
             }?.run {
@@ -64,7 +67,7 @@ class ZedMediaHelper {
                     queueInputBuffer(inputBufferIndex, 0, srcBufferSize, 0, 0)
                 }
             }?.let { encoder ->
-                encodeOutBuffer(encoder)
+                encodeOutBuffer(encoder, srcBufferSize)
             }
         }
     }
@@ -79,11 +82,12 @@ class ZedMediaHelper {
                 audioEncoder = null
                 audioFormat = null
                 bufferInfo = null
+                audioRecordTime = 0.0
                 isInitMediaCodec = false
-                Log.d("wszed","releaseMediaCodec")
-            }catch (e: Exception){
+                Log.d("wszed", "releaseMediaCodec")
+            } catch (e: Exception) {
 
-            }finally {
+            } finally {
                 audioOutputStream?.close()
                 audioOutputStream = null
             }
@@ -91,10 +95,10 @@ class ZedMediaHelper {
     }
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
-    private fun encodeOutBuffer(encoder: MediaCodec) {
+    private fun encodeOutBuffer(encoder: MediaCodec, bufferSize: Int) {
         encoder.dequeueOutputBuffer(bufferInfo!!, 0)
             .takeIf { outputBufferIndex -> outputBufferIndex >= 0 }?.let {
-                Log.d("wszed","encodeOutBuffer")
+                Log.d("wszed", "encodeOutBuffer")
                 encoder.getOutputBuffer(it)?.run {
                     pcmBufferSize = bufferInfo!!.size + 7
                     outTempBuffer = ByteArray(pcmBufferSize)
@@ -105,16 +109,20 @@ class ZedMediaHelper {
                     position(bufferInfo!!.offset)
                     audioOutputStream?.write(outTempBuffer!!, 0, pcmBufferSize)
                     encoder.releaseOutputBuffer(it, 0)
+                    audioRecordTime += getRecordTime(bufferSize)
+                    onRecordListener?.onRecord(audioRecordTime.toInt())
                     outTempBuffer = null
-                    encodeOutBuffer(encoder)
+                    encodeOutBuffer(encoder, bufferSize)
                 }
             }
     }
 
+    private fun getRecordTime(bufferSize: Int) = bufferSize * 1.0 / (audioSampleRate * 2 * 2)
+
     private fun addAdtsHeader(packet: ByteArray, packetLen: Int) {
         //AAC LC
         val profile = 2
-        val freqIdx = aacSampleRate
+        val freqIdx = getAdtsSmapleRate(audioSampleRate)
         val chanCfg = 2
 
         //0xFFF(12bit),这里只取了8位,所以还差4位放到下一个里面
