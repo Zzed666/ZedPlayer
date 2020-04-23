@@ -41,6 +41,8 @@ void openSLESBufferQueueCallBack(SLAndroidSimpleBufferQueueItf bufferQueueItf, v
                                             zedAudio->clock_time);
         zedAudio->cCallJava->callOnDB(CTHREADTYPE_CHILD, zedAudio->getDB(
                 reinterpret_cast<char *>(zedAudio->sound_touch_buffer_16bit), size * 2 * 2));
+        zedAudio->cCallJava->callOnPcmToAAC(CTHREADTYPE_CHILD, zedAudio->sound_touch_buffer_16bit,
+                                            size * 2 * 2);
         //将重采样后的数据压入OpenSLES中的播放队列中
         if (size > 0) {
             (*zedAudio->androidSimpleBufferQueue)->Enqueue(zedAudio->androidSimpleBufferQueue,

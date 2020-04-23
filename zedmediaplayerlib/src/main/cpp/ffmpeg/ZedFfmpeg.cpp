@@ -58,6 +58,7 @@ void ZedFfmpeg::prepareMedia(const char *mediaPath) {
             foundAudioStream = true;
             zedAudio->audio_index = i;
             total_duration = pFormatCtx->duration / AV_TIME_BASE;
+            sample_rate = pFormatCtx->streams[i]->codecpar->sample_rate;
             zedAudio->audio_time_base = pFormatCtx->streams[zedAudio->audio_index]->time_base;
             zedAudio->total_duration = total_duration;
             break;

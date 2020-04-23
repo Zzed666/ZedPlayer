@@ -1,6 +1,10 @@
 package com.github.zedmediaplayerlib.audio
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import com.github.zedmediaplayerlib.audio.listener.*
+import com.github.zedmediaplayerlib.commons.ZedMediaHelper
+import java.io.File
 
 class ZedAudioPlayer {
     private var onLoadListener: OnLoadListener? = null
@@ -12,6 +16,8 @@ class ZedAudioPlayer {
     private var onDBListener: OnDBListener? = null
     private var onErrorListener: OnErrorListener? = null
     private var onCompleteListener: OnCompleteListener? = null
+
+    private var zedMediaHelper: ZedMediaHelper? = null
 
     companion object {
         init {
@@ -33,6 +39,7 @@ class ZedAudioPlayer {
     private external fun n_volume(volumePercent: Int)
     private external fun n_stop(skipNext: Boolean, nextMediaPath: String)
     private external fun n_duration(): Int
+    private external fun n_samplerate(): Int
     private external fun n_mute(muteChannle: Int)
     private external fun n_speed(speed: Float)
     private external fun n_pitch(pitch: Float)
@@ -208,4 +215,27 @@ class ZedAudioPlayer {
         }).start()
     }
     /**-------------------------------------------pitch---------------------------------------*/
+
+    /**-------------------------------------------sample rate---------------------------------------*/
+    fun getSampleRate(): Int {
+        return n_samplerate()
+    }
+    /**-------------------------------------------sample rate---------------------------------------*/
+
+    /**-------------------------------------------record---------------------------------------*/
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
+    fun startRecord(outFile: File) {
+        getSampleRate().takeIf { it > 0 }?.run {
+            if (zedMediaHelper == null) {
+                zedMediaHelper = ZedMediaHelper()
+            }
+            zedMediaHelper?.initMediaCodec(this, outFile)
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
+    fun cCallPcmToAACBack(srcBuffer: ByteArray, srcBufferSize: Int) {
+        zedMediaHelper?.encodePcmToAAC(srcBuffer, srcBufferSize)
+    }
+    /**-------------------------------------------record---------------------------------------*/
 }

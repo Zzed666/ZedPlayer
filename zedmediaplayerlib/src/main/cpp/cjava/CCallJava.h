@@ -27,6 +27,7 @@ public:
     jmethodID jstopmid = nullptr;
     jmethodID jerrormid = nullptr;
     jmethodID jcompletemid = nullptr;
+    jmethodID jpcmtoaacmid = nullptr;
 public:
     CCallJava(JavaVM *vm, JNIEnv *env, jobject obj);
     ~CCallJava();
@@ -39,6 +40,7 @@ public:
     void callOnStop(int cType);
     void callOnError(int cType, int errorCode, char *errorMsg);
     void callOnComplete(int cType);
+    void callOnPcmToAAC(int cType, void *buffer, int bufferSize);
 };
 
 

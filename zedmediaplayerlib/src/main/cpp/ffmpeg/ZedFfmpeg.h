@@ -16,6 +16,7 @@ public:
     bool foundAudioStream = false;
     bool ffmpeg_load_exit = false;
     int total_duration = 0;
+    int sample_rate = 44100;
 
     CCallJava *cCallJava = nullptr;
     ZedAudio *zedAudio = nullptr;

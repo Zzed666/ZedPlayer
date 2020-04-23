@@ -5,6 +5,7 @@ import android.os.*
 import android.util.Log
 import android.widget.SeekBar
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import com.github.zedmediaplayerlib.audio.ZedAudioPlayer
 import com.github.zedmediaplayerlib.audio.listener.*
@@ -26,6 +27,7 @@ class ZedAudioActivity : AppCompatActivity() {
     var muteValue = ZedMuteEnum.MUTE_CENTER.muteValue
     var speedValue = 1.0f
     var pitchValue = 1.0f
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_zed_audio)
@@ -39,6 +41,7 @@ class ZedAudioActivity : AppCompatActivity() {
         zedAudioPlayer = ZedAudioPlayer()
     }
 
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     private fun initEvents() {
         zedAudioPlayer?.setOnLoadListener(object : OnLoadListener {
             override fun onLoad(load: Boolean) {
@@ -115,13 +118,13 @@ class ZedAudioActivity : AppCompatActivity() {
             }
         })
         prepare.setOnClickListener {
-            //            zedAudioPlayer?.prepared(
-//                File(
-//                    Environment.getExternalStorageDirectory(),
-//                    "Yasuo.mp3"
-//                ).absolutePath
-//            )
-            zedAudioPlayer?.prepared("http://fs.ios.kugou.com/202004101153/93a93051133616d6866fc9557cce9118/G153/M04/13/14/OYcBAFz3fF6AbF0fADS_2OPt0ag626.mp3")
+            zedAudioPlayer?.prepared(
+                File(
+                    Environment.getExternalStorageDirectory(),
+                    "Yasuo.mp3"
+                ).absolutePath
+            )
+//            zedAudioPlayer?.prepared("http://fs.ios.kugou.com/202004101153/93a93051133616d6866fc9557cce9118/G153/M04/13/14/OYcBAFz3fF6AbF0fADS_2OPt0ag626.mp3")
         }
         pause.setOnClickListener {
             zedAudioPlayer?.pause(true)
@@ -136,13 +139,13 @@ class ZedAudioActivity : AppCompatActivity() {
             zedAudioPlayer?.stop()
         }
         next.setOnClickListener {
-            //            zedAudioPlayer?.next(
-//                File(
-//                    Environment.getExternalStorageDirectory(),
-//                    "告白の夜.mp3"
-//                ).absolutePath
-//            )
-            zedAudioPlayer?.next("http://fs.ios.kugou.com/202004101026/7443d218bdfccf501004e288efeb8485/G151/M07/0E/19/d5QEAFz2MN-AJrB_ALDykLp1gS4802.mp3")
+            zedAudioPlayer?.next(
+                File(
+                    Environment.getExternalStorageDirectory(),
+                    "告白の夜.mp3"
+                ).absolutePath
+            )
+//            zedAudioPlayer?.next("http://fs.ios.kugou.com/202004101026/7443d218bdfccf501004e288efeb8485/G151/M07/0E/19/d5QEAFz2MN-AJrB_ALDykLp1gS4802.mp3")
         }
         seek_bar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
@@ -222,6 +225,14 @@ class ZedAudioActivity : AppCompatActivity() {
         pitch_one_and_half.setOnClickListener {
             zedAudioPlayer?.pitch(1.5f)
             pitchValue = 1.5f
+        }
+        start_record.setOnClickListener {
+            zedAudioPlayer?.startRecord(
+                File(
+                    Environment.getExternalStorageDirectory(),
+                    "test.aac"
+                )
+            )
         }
     }
 

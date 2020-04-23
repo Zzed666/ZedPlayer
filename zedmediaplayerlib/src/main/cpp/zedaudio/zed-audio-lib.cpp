@@ -164,6 +164,19 @@ Java_com_github_zedmediaplayerlib_audio_ZedAudioPlayer_n_1duration(JNIEnv *env,
     }
 }
 
+extern "C" JNIEXPORT jint JNICALL
+Java_com_github_zedmediaplayerlib_audio_ZedAudioPlayer_n_1samplerate(JNIEnv *env,
+                                                               jobject obj) {
+    if (zedFfmpeg != nullptr) {
+        return zedFfmpeg->sample_rate;
+    } else {
+        if (FFMPEG_LOG) {
+            FFLOGE("ffmpeg get samplerate return because of it isn't initial!")
+        }
+        return -1;
+    }
+}
+
 extern "C" JNIEXPORT void JNICALL
 Java_com_github_zedmediaplayerlib_audio_ZedAudioPlayer_n_1stop(JNIEnv *env,
                                                                jobject obj,
