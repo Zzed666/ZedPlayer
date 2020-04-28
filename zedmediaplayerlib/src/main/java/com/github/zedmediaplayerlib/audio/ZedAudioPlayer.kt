@@ -74,9 +74,9 @@ class ZedAudioPlayer {
 
     /**-------------------------------------------start---------------------------------------*/
     fun start() {
-        Thread(Runnable {
+//        Thread(Runnable {
             n_start()
-        }).start()
+//        }).start()
     }
     /**-------------------------------------------start---------------------------------------*/
 
@@ -118,10 +118,10 @@ class ZedAudioPlayer {
     }
 
     fun stop() {
-        Thread(Runnable {
+//        Thread(Runnable {
             stopRecord()
             n_stop(false, "")
-        }).start()
+//        }).start()
     }
 
     fun cCallStopBack() {
@@ -185,9 +185,9 @@ class ZedAudioPlayer {
 
     /**-------------------------------------------next---------------------------------------*/
     fun next(nextMediaPath: String) {
-        Thread(Runnable {
+//        Thread(Runnable {
             n_stop(true, nextMediaPath)
-        }).start()
+//        }).start()
     }
 
     fun cCallNextBack(nextMediaPath: String) {

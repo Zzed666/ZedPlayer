@@ -4,9 +4,10 @@
 
 #include "ZedFfmpeg.h"
 
-ZedFfmpeg::ZedFfmpeg(ZedStatus *zedStatus, CCallJava *cCallJava) {
+ZedFfmpeg::ZedFfmpeg(ZedStatus *zedStatus, CCallJava *cCallJava, const char *mediaPath) {
     this->zedStatus = zedStatus;
     this->cCallJava = cCallJava;
+    this->mediaPath = mediaPath;
     pthread_mutex_init(&load_thread_mutex, nullptr);
     pthread_mutex_init(&seek_thread_mutex, nullptr);
 }
@@ -19,7 +20,17 @@ int formatInterruptCallBack(void *context) {
     return 0;
 }
 
-void ZedFfmpeg::prepareMedia(const char *mediaPath) {
+void *prepareMediaThread(void *data) {
+    auto zedFfmpeg = (ZedFfmpeg *) data;
+    zedFfmpeg->prepareDecode();
+    pthread_exit(&zedFfmpeg->prepare_decode_thread);
+}
+
+void ZedFfmpeg::prepareMedia() {
+    pthread_create(&prepare_decode_thread, nullptr, prepareMediaThread, this);
+}
+
+void ZedFfmpeg::prepareDecode() {
     cCallJava->callOnLoad(CTHREADTYPE_CHILD, true);
     pthread_mutex_lock(&load_thread_mutex);
     //初始化网络
@@ -137,6 +148,7 @@ void ZedFfmpeg::startAudio() {
             if (FFMPEG_LOG) {
                 FFLOGI("ffmpeg is seeking,continue to decode audio");
             }
+            av_usleep(1000 * 100);
             continue;
         }
         /**
@@ -146,16 +158,23 @@ void ZedFfmpeg::startAudio() {
          * 即使seek的时候clear queue中AvPacket也只是清除此数值大小的队列数据，av_read_frame=0依然可以读到下一帧数据
          * 另外还可以减少内存的占用
          * */
-        if (zedAudio->zedQueue->getPacketSize() > 40) {
+        if (zedAudio != nullptr && zedAudio->zedQueue != nullptr && zedAudio->zedQueue->getPacketSize() > 100) {
+            av_usleep(1000 * 100);
             continue;
         }
         //读取数据到AVPacket
         AVPacket *pPacket = av_packet_alloc();
         pthread_mutex_lock(&seek_thread_mutex);
+        if (pFormatCtx == nullptr) {
+            if (FFMPEG_LOG) {
+                FFLOGE("ffmpeg startAudio return because of pFormatCtx is null");
+            }
+            return;
+        }
         int ret = av_read_frame(pFormatCtx, pPacket);
         pthread_mutex_unlock(&seek_thread_mutex);
         if (ret == 0) {
-            if (pPacket->stream_index == zedAudio->audio_index) {
+            if (zedAudio != nullptr && pPacket->stream_index == zedAudio->audio_index) {
                 zedAudio->zedQueue->putPackets(pPacket);
             } else {
                 av_packet_free(&pPacket);
@@ -173,7 +192,10 @@ void ZedFfmpeg::startAudio() {
                 if (zedAudio->zedQueue->getPacketSize() == 0) {
                     zedStatus->exit = true;
                     break;
-                } else continue;
+                } else {
+                    av_usleep(1000 * 100);
+                    continue;
+                }
             }
             break;
         }

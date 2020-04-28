@@ -17,17 +17,20 @@ public:
     bool ffmpeg_load_exit = false;
     int total_duration = 0;
     int sample_rate = 44100;
+    const char* mediaPath = nullptr;
 
     CCallJava *cCallJava = nullptr;
     ZedAudio *zedAudio = nullptr;
     ZedStatus *zedStatus = nullptr;
 
+    pthread_t prepare_decode_thread;
     pthread_mutex_t load_thread_mutex;
     pthread_mutex_t seek_thread_mutex;
 public:
-    ZedFfmpeg(ZedStatus *zedStatus,CCallJava *cCallJava);
+    ZedFfmpeg(ZedStatus *zedStatus,CCallJava *cCallJava,const char* mediaPath);
     ~ZedFfmpeg();
-    void prepareMedia(const char* mediaPath);
+    void prepareMedia();
+    void prepareDecode();
     void startAudio();
     void pauseAudio(bool pause);
     void seekAudio(int64_t seek_time);

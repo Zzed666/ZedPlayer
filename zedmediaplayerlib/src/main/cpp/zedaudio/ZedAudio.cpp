@@ -37,14 +37,16 @@ void openSLESBufferQueueCallBack(SLAndroidSimpleBufferQueueItf bufferQueueItf, v
         if (zedAudio->clock_time - zedAudio->last_time >= 0.1) {
             zedAudio->last_time = zedAudio->clock_time;
         }
-        zedAudio->cCallJava->callOnPlayTime(CTHREADTYPE_CHILD, zedAudio->total_duration,
-                                            zedAudio->clock_time);
-        zedAudio->cCallJava->callOnDB(CTHREADTYPE_CHILD, zedAudio->getDB(
-                reinterpret_cast<char *>(zedAudio->sound_touch_buffer_16bit), size * 2 * 2));
-        if (zedAudio->isrecord) {
-            zedAudio->cCallJava->callOnPcmToAAC(CTHREADTYPE_CHILD,
-                                                zedAudio->sound_touch_buffer_16bit,
-                                                size * 2 * 2);
+        if(zedAudio->cCallJava != nullptr){
+            zedAudio->cCallJava->callOnPlayTime(CTHREADTYPE_CHILD, zedAudio->total_duration,
+                                                zedAudio->clock_time);
+            zedAudio->cCallJava->callOnDB(CTHREADTYPE_CHILD, zedAudio->getDB(
+                    reinterpret_cast<char *>(zedAudio->sound_touch_buffer_16bit), size * 2 * 2));
+            if (zedAudio->isrecord) {
+                zedAudio->cCallJava->callOnPcmToAAC(CTHREADTYPE_CHILD,
+                                                    zedAudio->sound_touch_buffer_16bit,
+                                                    size * 2 * 2);
+            }
         }
         //将重采样后的数据压入OpenSLES中的播放队列中
         if (size > 0) {
@@ -143,12 +145,17 @@ int ZedAudio::getSoundTouchData() {
                     sound_touch_buffer_16bit[i] = (sound_touch_buffer_8bit[i * 2] |
                                                    (sound_touch_buffer_8bit[i * 2 + 1] << 8));
                 }
-                soundTouch->putSamples(sound_touch_buffer_16bit, resample_nbs);
-                sound_touch_sample_size = soundTouch->receiveSamples(sound_touch_buffer_16bit,
-                                                                     original_resample_size / 2 /
-                                                                     2);
+                if (soundTouch != nullptr) {
+                    soundTouch->putSamples(sound_touch_buffer_16bit, resample_nbs);
+                    sound_touch_sample_size = soundTouch->receiveSamples(sound_touch_buffer_16bit,
+                                                                         original_resample_size /
+                                                                         2 /
+                                                                         2);
+                }
             } else {
-                soundTouch->flush();
+                if (soundTouch != nullptr) {
+                    soundTouch->flush();
+                }
             }
         }
         if (sound_touch_sample_size == 0) {
@@ -200,6 +207,7 @@ int ZedAudio::resample() {
                 zedStatus->load = true;
                 cCallJava->callOnLoad(CTHREADTYPE_CHILD, true);
             }
+            av_usleep(1000 * 100);
             continue;
         } else {
             if (zedStatus->load) {
@@ -451,6 +459,8 @@ void ZedAudio::release() {
         playObj = nullptr;
         playPlay = nullptr;
         androidSimpleBufferQueue = nullptr;
+        volumeVolume = nullptr;
+        muteMute = nullptr;
     }
     if (mixoutObj != nullptr) {
         (*mixoutObj)->Destroy(mixoutObj);
@@ -466,14 +476,19 @@ void ZedAudio::release() {
         free(out_buffer);
         out_buffer = nullptr;
     }
-//    if (sound_touch_buffer_8bit != nullptr) {
-////        free(sound_touch_buffer_8bit);
-//        sound_touch_buffer_8bit = nullptr;
-//    }
-//    if (sound_touch_buffer_16bit != nullptr) {
-////        free(sound_touch_buffer_16bit);
-//        sound_touch_buffer_16bit = nullptr;
-//    }
+    if (sound_touch_buffer_8bit != nullptr) {
+        //sound_touch_buffer_8bit指向out_buffer的内存地址，所以out_buffer free了,sound_touch_buffer_8bit就不能再free了
+//        free(sound_touch_buffer_8bit);
+        sound_touch_buffer_8bit = nullptr;
+    }
+    if (sound_touch_buffer_16bit != nullptr) {
+        free(sound_touch_buffer_16bit);
+        sound_touch_buffer_16bit = nullptr;
+    }
+    if (soundTouch != nullptr) {
+        delete (soundTouch);
+        soundTouch = nullptr;
+    }
     if (pAvCodecCtx != nullptr) {
         avcodec_close(pAvCodecCtx);
         avcodec_free_context(&pAvCodecCtx);

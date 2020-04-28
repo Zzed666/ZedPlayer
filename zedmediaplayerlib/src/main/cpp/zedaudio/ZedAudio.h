@@ -26,7 +26,7 @@ public:
     float speed_init = 1.0f;
     float pitch_init = 1.0f;
     bool isrecord = false;
-    uint8_t *out_buffer;
+    uint8_t *out_buffer = nullptr;
     AVRational audio_time_base;
 
     AVCodec *pAvCodec = nullptr;
