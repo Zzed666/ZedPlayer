@@ -11,6 +11,7 @@ class ZedAudioPlayer {
     private var onPreparedListener: OnPreparedListener? = null
     private var onPauseListener: OnPauseListener? = null
     private var onSeekListener: OnSeekListener? = null
+    private var onNextListener: OnNextListener? = null
     private var onStopListener: OnStopListener? = null
     private var onPlayTimeListener: OnPlayTimeListener? = null
     private var onDBListener: OnDBListener? = null
@@ -62,9 +63,7 @@ class ZedAudioPlayer {
     }
 
     fun prepared(mediaPath: String) {
-        Thread(Runnable {
-            n_prepared(mediaPath)
-        }).start()
+        n_prepared(mediaPath)
     }
 
     fun cCallPreparedBack() {
@@ -74,9 +73,7 @@ class ZedAudioPlayer {
 
     /**-------------------------------------------start---------------------------------------*/
     fun start() {
-//        Thread(Runnable {
-            n_start()
-//        }).start()
+        n_start()
     }
     /**-------------------------------------------start---------------------------------------*/
 
@@ -86,9 +83,7 @@ class ZedAudioPlayer {
     }
 
     fun pause(isPause: Boolean) {
-        Thread(Runnable {
-            n_pause(isPause)
-        }).start()
+        n_pause(isPause)
     }
 
     fun cCallPauseBack(pause: Boolean) {
@@ -102,9 +97,9 @@ class ZedAudioPlayer {
     }
 
     fun seek(seekTime: Int) {
-        Thread(Runnable {
+//        Thread(Runnable {
             n_seek(seekTime)
-        }).start()
+//        }).start()
     }
 
     fun cCallSeekBack(totalTime: Int, seekTime: Int) {
@@ -118,10 +113,8 @@ class ZedAudioPlayer {
     }
 
     fun stop() {
-//        Thread(Runnable {
-            stopRecord()
-            n_stop(false, "")
-//        }).start()
+        stopRecord()
+        n_stop(false, "")
     }
 
     fun cCallStopBack() {
@@ -185,13 +178,16 @@ class ZedAudioPlayer {
 
     /**-------------------------------------------next---------------------------------------*/
     fun next(nextMediaPath: String) {
-//        Thread(Runnable {
-            n_stop(true, nextMediaPath)
-//        }).start()
+        n_stop(true, nextMediaPath)
+    }
+
+    fun setOnNextListener(onNextListener: OnNextListener) {
+        this.onNextListener = onNextListener
     }
 
     fun cCallNextBack(nextMediaPath: String) {
-        prepared(nextMediaPath)
+//        prepared(nextMediaPath)
+        onNextListener?.onNext(nextMediaPath)
     }
     /**-------------------------------------------next---------------------------------------*/
 

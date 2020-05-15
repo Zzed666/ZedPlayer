@@ -9,6 +9,7 @@ import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import com.github.zedmediaplayerlib.audio.ZedAudioPlayer
 import com.github.zedmediaplayerlib.audio.listener.*
+import com.github.zedmediaplayerlib.commons.ZedMediaStatus
 import com.github.zedmediaplayerlib.commons.ZedMuteEnum
 import com.github.zedmediaplayerlib.commons.ZedTimeUtil
 import io.reactivex.Observable
@@ -25,6 +26,7 @@ class ZedAudioActivity : AppCompatActivity() {
     var isSeekBar: Boolean = false
     var volumeValue = 50
     var muteValue = ZedMuteEnum.MUTE_CENTER.muteValue
+    var statusValue = ZedMediaStatus.STATUS_IDLE.statusValue
     var speedValue = 1.0f
     var pitchValue = 1.0f
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
@@ -45,9 +47,13 @@ class ZedAudioActivity : AppCompatActivity() {
     private fun initEvents() {
         zedAudioPlayer?.setOnLoadListener(object : OnLoadListener {
             override fun onLoad(load: Boolean) {
-                if (load) {
+                statusValue = if (load) {
                     Log.i("zzed", "media is loading...")
-                } else Log.i("zzed", "media is playing...")
+                    ZedMediaStatus.STATUS_LOADING.statusValue
+                } else {
+                    Log.i("zzed", "media is playing...")
+                    ZedMediaStatus.STATUS_PLAY.statusValue
+                }
             }
         })
         zedAudioPlayer?.setOnPrepareListener(object : OnPreparedListener {
@@ -57,14 +63,19 @@ class ZedAudioActivity : AppCompatActivity() {
                 zedAudioPlayer?.pitch(pitchValue)
                 zedAudioPlayer?.volume(volumeValue)
                 zedAudioPlayer?.mute(muteValue)
+                statusValue = ZedMediaStatus.STATUS_PREPARED.statusValue
                 zedAudioPlayer?.start()
             }
         })
         zedAudioPlayer?.setOnPauseListener(object : OnPauseListener {
             override fun onPause(pause: Boolean) {
-                if (pause) {
+                statusValue = if (pause) {
                     Log.i("zzed", "media is paused...")
-                } else Log.i("zzed", "media is resume playing...")
+                    ZedMediaStatus.STATUS_PAUSE.statusValue
+                } else {
+                    Log.i("zzed", "media is resume playing...")
+                    ZedMediaStatus.STATUS_PLAY.statusValue
+                }
             }
         })
         zedAudioPlayer?.setOnSeekListener(object : OnSeekListener {
@@ -75,9 +86,18 @@ class ZedAudioActivity : AppCompatActivity() {
                 )
             }
         })
+        zedAudioPlayer?.setOnNextListener(object : OnNextListener{
+            override fun onNext(path: String) {
+                if (statusValue == ZedMediaStatus.STATUS_IDLE.statusValue) {
+                    Log.e("zzed", "media is next!")
+                    zedAudioPlayer?.prepared(path)
+                }
+            }
+        })
         zedAudioPlayer?.setOnStopListener(object : OnStopListener {
             override fun onStop() {
                 Log.i("zzed", "media is stopped!")
+                statusValue = ZedMediaStatus.STATUS_IDLE.statusValue
             }
         })
         zedAudioPlayer?.setOnPlayTimeListener(object : OnPlayTimeListener {
@@ -117,40 +137,51 @@ class ZedAudioActivity : AppCompatActivity() {
                 zedAudioPlayer?.stop()
             }
         })
-        zedAudioPlayer?.setOnOnRecordListener(object : OnRecordListener{
+        zedAudioPlayer?.setOnOnRecordListener(object : OnRecordListener {
             override fun onRecord(time: Int) {
                 Log.i("zzed", "media record time is $time.")
             }
         })
         prepare.setOnClickListener {
-            zedAudioPlayer?.prepared(
-                File(
-                    Environment.getExternalStorageDirectory(),
-                    "Yasuo.mp3"
-                ).absolutePath
-            )
+            if (statusValue == ZedMediaStatus.STATUS_IDLE.statusValue) {
+                zedAudioPlayer?.prepared(
+                    File(
+                        Environment.getExternalStorageDirectory(),
+                        "Yasuo.mp3"
+                    ).absolutePath
+                )
 //            zedAudioPlayer?.prepared("http://fs.ios.kugou.com/202004101153/93a93051133616d6866fc9557cce9118/G153/M04/13/14/OYcBAFz3fF6AbF0fADS_2OPt0ag626.mp3")
+            }
         }
         pause.setOnClickListener {
-            zedAudioPlayer?.pause(true)
+            if (statusValue == ZedMediaStatus.STATUS_PLAY.statusValue)
+                zedAudioPlayer?.pause(true)
         }
         resume.setOnClickListener {
-            zedAudioPlayer?.pause(false)
+            if (statusValue == ZedMediaStatus.STATUS_PAUSE.statusValue)
+                zedAudioPlayer?.pause(false)
         }
 //        seek.setOnClickListener {
 //            zedAudioPlayer.seek(270)
 //        }
         stop.setOnClickListener {
-            zedAudioPlayer?.stop()
+            if (statusValue != ZedMediaStatus.STATUS_IDLE.statusValue && statusValue != ZedMediaStatus.STATUS_STOPING.statusValue)
+                statusValue = ZedMediaStatus.STATUS_STOPING.statusValue
+                zedAudioPlayer?.stop()
         }
         next.setOnClickListener {
-            zedAudioPlayer?.next(
-                File(
-                    Environment.getExternalStorageDirectory(),
-                    "告白の夜.mp3"
-                ).absolutePath
-            )
+            if (statusValue != ZedMediaStatus.STATUS_STOPING.statusValue) {
+                if(statusValue != ZedMediaStatus.STATUS_IDLE.statusValue){
+                    statusValue = ZedMediaStatus.STATUS_STOPING.statusValue
+                }
+                zedAudioPlayer?.next(
+                    File(
+                        Environment.getExternalStorageDirectory(),
+                        "告白の夜.mp3"
+                    ).absolutePath
+                )
 //            zedAudioPlayer?.next("http://fs.ios.kugou.com/202004101026/7443d218bdfccf501004e288efeb8485/G151/M07/0E/19/d5QEAFz2MN-AJrB_ALDykLp1gS4802.mp3")
+            }
         }
         seek_bar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {

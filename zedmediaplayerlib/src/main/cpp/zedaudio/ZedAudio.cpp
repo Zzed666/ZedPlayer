@@ -202,7 +202,7 @@ int ZedAudio::resample() {
     int ret = -1;
     int resample_size = 0;
     while (zedStatus != nullptr && !zedStatus->exit) {
-        if (zedQueue->getPacketSize() == 0) {
+        if (zedQueue != nullptr && zedQueue->getPacketSize() == 0) {
             if (!zedStatus->load) {
                 zedStatus->load = true;
                 cCallJava->callOnLoad(CTHREADTYPE_CHILD, true);
@@ -216,7 +216,7 @@ int ZedAudio::resample() {
             }
         }
         pAvPacket = av_packet_alloc();
-        if (zedQueue->getPackets(pAvPacket) != 0) {
+        if (zedQueue != nullptr && zedQueue->getPackets(pAvPacket) != 0) {
             releaseTempSource();
             continue;
         }

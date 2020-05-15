@@ -158,7 +158,8 @@ void ZedFfmpeg::startAudio() {
          * 即使seek的时候clear queue中AvPacket也只是清除此数值大小的队列数据，av_read_frame=0依然可以读到下一帧数据
          * 另外还可以减少内存的占用
          * */
-        if (zedAudio != nullptr && zedAudio->zedQueue != nullptr && zedAudio->zedQueue->getPacketSize() > 100) {
+        if (zedAudio != nullptr && zedAudio->zedQueue != nullptr &&
+            zedAudio->zedQueue->getPacketSize() > 100) {
             av_usleep(1000 * 100);
             continue;
         }
@@ -174,7 +175,7 @@ void ZedFfmpeg::startAudio() {
         int ret = av_read_frame(pFormatCtx, pPacket);
         pthread_mutex_unlock(&seek_thread_mutex);
         if (ret == 0) {
-            if (zedAudio != nullptr && pPacket->stream_index == zedAudio->audio_index) {
+            if (zedAudio != nullptr && zedAudio->zedQueue != nullptr && pPacket->stream_index == zedAudio->audio_index) {
                 zedAudio->zedQueue->putPackets(pPacket);
             } else {
                 av_packet_free(&pPacket);
@@ -201,7 +202,8 @@ void ZedFfmpeg::startAudio() {
         }
     }
 
-    if (cCallJava != NULL) {
+    if (cCallJava != nullptr) {
+        FFLOGI("callOnComplete");
         cCallJava->callOnComplete(CTHREADTYPE_CHILD);
     }
 
@@ -281,7 +283,9 @@ void ZedFfmpeg::stopAudio() {
 //        }
 //        return;
 //    }
-    zedStatus->exit = true;
+    if(zedStatus != nullptr){
+        zedStatus->exit = true;
+    }
     int sleep_count = 0;
     pthread_mutex_lock(&load_thread_mutex);
     while (!ffmpeg_load_exit) {
@@ -295,7 +299,7 @@ void ZedFfmpeg::stopAudio() {
     if (zedAudio != nullptr) {
         zedAudio->stop();
     }
-    cCallJava->callOnStop(CTHREADTYPE_CHILD);
+//    cCallJava->callOnStop(CTHREADTYPE_CHILD);
     release();
     pthread_mutex_unlock(&load_thread_mutex);
 }
@@ -315,6 +319,7 @@ void ZedFfmpeg::release() {
         zedStatus = nullptr;
     }
     if (cCallJava != nullptr) {
+        cCallJava->callOnStop(CTHREADTYPE_CHILD);
         cCallJava = nullptr;
     }
 }
