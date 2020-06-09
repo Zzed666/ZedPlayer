@@ -128,14 +128,15 @@ void ZedFfmpeg::prepareDecode() {
         pthread_mutex_unlock(&load_thread_mutex);
         return;
     }
+    ffmpeg_load_exit = true;
+    pthread_mutex_unlock(&load_thread_mutex);
     if (cCallJava != NULL) {
         cCallJava->callOnPrepare(CTHREADTYPE_CHILD);
     }
-    ffmpeg_load_exit = true;
-    pthread_mutex_unlock(&load_thread_mutex);
 }
 
 void ZedFfmpeg::startAudio() {
+    pthread_mutex_lock(&load_thread_mutex);
     if (zedAudio == nullptr) {
         if (FFMPEG_LOG) {
             FFLOGE("ffmpeg startAudio return because of zedAudio is null");
@@ -201,6 +202,8 @@ void ZedFfmpeg::startAudio() {
             break;
         }
     }
+
+    pthread_mutex_unlock(&load_thread_mutex);
 
     if (cCallJava != nullptr) {
         FFLOGI("callOnComplete");
