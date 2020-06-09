@@ -26,6 +26,7 @@ public:
     float speed_init = 1.0f;
     float pitch_init = 1.0f;
     bool isrecord = false;
+    bool isavpacketfinished = true;
     uint8_t *out_buffer = nullptr;
     AVRational audio_time_base;
 
@@ -72,7 +73,7 @@ public:
     void pitch(float audio_pitch);
     void record(bool audio_record);
     int getCurrentSampleRate(int sample_rate);
-    void releaseTempSource();
+    void releaseTempSource(bool is_release_avpacket);
     void release();
 };
 

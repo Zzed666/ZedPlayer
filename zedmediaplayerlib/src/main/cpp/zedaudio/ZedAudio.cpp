@@ -37,7 +37,7 @@ void openSLESBufferQueueCallBack(SLAndroidSimpleBufferQueueItf bufferQueueItf, v
         if (zedAudio->clock_time - zedAudio->last_time >= 0.1) {
             zedAudio->last_time = zedAudio->clock_time;
         }
-        if(zedAudio->cCallJava != nullptr){
+        if (zedAudio->cCallJava != nullptr) {
             zedAudio->cCallJava->callOnPlayTime(CTHREADTYPE_CHILD, zedAudio->total_duration,
                                                 zedAudio->clock_time);
             zedAudio->cCallJava->callOnDB(CTHREADTYPE_CHILD, zedAudio->getDB(
@@ -215,18 +215,21 @@ int ZedAudio::resample() {
                 cCallJava->callOnLoad(CTHREADTYPE_CHILD, false);
             }
         }
-        pAvPacket = av_packet_alloc();
-        if (zedQueue != nullptr && zedQueue->getPackets(pAvPacket) != 0) {
-            releaseTempSource();
-            continue;
-        }
-        ret = avcodec_send_packet(pAvCodecCtx, pAvPacket);
-        if (ret != 0) {
-            if (FFMPEG_LOG) {
-                FFLOGE("resample:avcodec send packet error");
+        //.ape 文件1个AVPacket包含多个AVframe,所以加一个flag循环遍历,当read frame != 0的时候，才说明AVPacket里的AVFrame已经读取完了,再去获取新的AVPacket
+        if (isavpacketfinished) {
+            pAvPacket = av_packet_alloc();
+            if (zedQueue != nullptr && zedQueue->getPackets(pAvPacket) != 0) {
+                releaseTempSource(true);
+                continue;
             }
-            releaseTempSource();
-            continue;
+            ret = avcodec_send_packet(pAvCodecCtx, pAvPacket);
+            if (ret != 0) {
+                if (FFMPEG_LOG) {
+                    FFLOGE("resample:avcodec send packet error");
+                }
+                releaseTempSource(true);
+                continue;
+            }
         }
         pAvFrame = av_frame_alloc();
         ret = avcodec_receive_frame(pAvCodecCtx, pAvFrame);
@@ -234,9 +237,11 @@ int ZedAudio::resample() {
             if (FFMPEG_LOG) {
                 FFLOGE("resample:avcodec receive frame error");
             }
-            releaseTempSource();
+            isavpacketfinished = true;
+            releaseTempSource(true);
             continue;
         }
+        isavpacketfinished = false;
         if (pAvFrame->channel_layout == 0 && pAvFrame->channels > 0) {
             pAvFrame->channel_layout = av_get_default_channel_layout(pAvFrame->channels);
         } else if (pAvFrame->channel_layout > 0 && pAvFrame->channels == 0) {
@@ -254,7 +259,8 @@ int ZedAudio::resample() {
             if (FFMPEG_LOG) {
                 FFLOGE("resample:SwrContext init error");
             }
-            releaseTempSource();
+            isavpacketfinished = true;
+            releaseTempSource(true);
             continue;
         }
         resample_nbs = swr_convert(pSwrCtx, &out_buffer, pAvFrame->nb_samples,
@@ -270,7 +276,7 @@ int ZedAudio::resample() {
         }
         clock_time = now_time;
         sound_touch_buffer_8bit = out_buffer;
-        releaseTempSource();
+        releaseTempSource(false);
         break;
     }
     return resample_size;
@@ -427,8 +433,8 @@ int ZedAudio::getCurrentSampleRate(int sample_rate) {
     return rate;
 }
 
-void ZedAudio::releaseTempSource() {
-    if (pAvPacket != nullptr) {
+void ZedAudio::releaseTempSource(bool isReleaseAVPacket) {
+    if (pAvPacket != nullptr && isReleaseAVPacket) {
         av_packet_free(&pAvPacket);
         av_free(pAvPacket);
         pAvPacket = nullptr;

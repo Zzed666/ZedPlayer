@@ -158,6 +158,8 @@ void ZedFfmpeg::startAudio() {
          * 所以我们设置队列为固定大小，>某个值（此处为40）的时候continue,这样就能保证我们只保存此大小的AvPacket队列，
          * 即使seek的时候clear queue中AvPacket也只是清除此数值大小的队列数据，av_read_frame=0依然可以读到下一帧数据
          * 另外还可以减少内存的占用
+         * (ps:.ape文件可能一个AVPacket包含多个AVFrame,所以当设置的缓存队列过大时,seek的时候clear queue的AvPacket,有可能缓存数据已经完毕,从而造成未seek到结尾就播放完,所以此时缓存队列
+         * 应该设置足够小,才不会出现这种情况,所以一般设为 1)
          * */
         if (zedAudio != nullptr && zedAudio->zedQueue != nullptr &&
             zedAudio->zedQueue->getPacketSize() > 100) {
@@ -230,6 +232,9 @@ void ZedFfmpeg::seekAudio(int64_t seek_time) {
     zedStatus->seeking = true;
     if (zedAudio != nullptr) {
         zedAudio->zedQueue->clearAvPackets();
+        //由于.ape等文件可能一个AVPacket包含多个AVFrame,所以在seek的时候可能会出现还有缓存的AVFrame的情况,也就是不会立即播放当前位置，而是把缓存frame播放完再播放当前位置
+        //所以seek的时候还要flush缓存
+        avcodec_flush_buffers(zedAudio->pAvCodecCtx);
         zedAudio->last_time = 0;
         zedAudio->clock_time = 0;
         pthread_mutex_lock(&seek_thread_mutex);
