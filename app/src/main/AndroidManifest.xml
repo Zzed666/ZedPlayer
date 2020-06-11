@@ -18,6 +18,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".ZedAudioActivity" />
+        <activity android:name=".ZedCutAudioToPcmActivity" />
     </application>
 
     <uses-permission android:name="android.permission.INTERNET"/>

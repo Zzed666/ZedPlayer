@@ -1,12 +1,17 @@
 package com.github.zedmediaplayerlib.audio
 
+import android.annotation.SuppressLint
 import android.os.Build
+import android.os.Parcelable
 import androidx.annotation.RequiresApi
 import com.github.zedmediaplayerlib.audio.listener.*
 import com.github.zedmediaplayerlib.commons.ZedMediaHelper
+import kotlinx.android.parcel.Parcelize
 import java.io.File
 
-class ZedAudioPlayer {
+@SuppressLint("ParcelCreator")
+@Parcelize
+class ZedAudioPlayer : Parcelable {
     private var onLoadListener: OnLoadListener? = null
     private var onPreparedListener: OnPreparedListener? = null
     private var onPauseListener: OnPauseListener? = null
@@ -18,6 +23,7 @@ class ZedAudioPlayer {
     private var onErrorListener: OnErrorListener? = null
     private var onCompleteListener: OnCompleteListener? = null
     private var onRecordListener: OnRecordListener? = null
+    private var onPcmInfoListener: OnPcmInfoListener? = null
 
     private var zedMediaHelper: ZedMediaHelper? = null
 
@@ -46,6 +52,7 @@ class ZedAudioPlayer {
     private external fun n_speed(speed: Float)
     private external fun n_pitch(pitch: Float)
     private external fun n_record(record: Boolean)
+    private external fun n_cutpcm(startTime: Float, endTime: Float, showPcm: Boolean): Boolean
 
     /**-------------------------------------------load---------------------------------------*/
     fun setOnLoadListener(onLoadListener: OnLoadListener) {
@@ -98,7 +105,7 @@ class ZedAudioPlayer {
 
     fun seek(seekTime: Int) {
 //        Thread(Runnable {
-            n_seek(seekTime)
+        n_seek(seekTime)
 //        }).start()
     }
 
@@ -259,4 +266,24 @@ class ZedAudioPlayer {
         zedMediaHelper?.encodePcmToAAC(srcBuffer, srcBufferSize)
     }
     /**-------------------------------------------record---------------------------------------*/
+
+    /**-------------------------------------------cut to pcm---------------------------------------*/
+    fun cutAudioToPcm(startTime: Float, endTime: Float, isShowPcm: Boolean) {
+        if (n_cutpcm(startTime,endTime,isShowPcm)) {
+            onPcmInfoListener?.onPcmSmapleRate(getSampleRate())
+            start()
+        } else {
+            stop()
+        }
+    }
+
+    fun setOnPcmInfoListener(onPcmInfoListener: OnPcmInfoListener) {
+        this.onPcmInfoListener = onPcmInfoListener
+    }
+
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
+    fun cCallPcmInfoBack(pcmBuffer: ByteArray, pcmBufferSize: Int) {
+        onPcmInfoListener?.onPcmInfo(pcmBuffer, pcmBufferSize)
+    }
+    /**-------------------------------------------cut to pcm---------------------------------------*/
 }

@@ -1,6 +1,7 @@
 package com.github.zedplayer
 
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.os.*
 import android.util.Log
 import android.widget.SeekBar
@@ -22,6 +23,7 @@ import java.io.File
 class ZedAudioActivity : AppCompatActivity() {
     var zedAudioPlayer: ZedAudioPlayer? = null
     private val disposables = CompositeDisposable()
+    var mediaPath: String = ""
     var position: Int = 0
     var isSeekBar: Boolean = false
     var volumeValue = 50
@@ -86,7 +88,7 @@ class ZedAudioActivity : AppCompatActivity() {
                 )
             }
         })
-        zedAudioPlayer?.setOnNextListener(object : OnNextListener{
+        zedAudioPlayer?.setOnNextListener(object : OnNextListener {
             override fun onNext(path: String) {
                 if (statusValue == ZedMediaStatus.STATUS_IDLE.statusValue) {
                     Log.e("zzed", "media is next!")
@@ -144,12 +146,11 @@ class ZedAudioActivity : AppCompatActivity() {
         })
         prepare.setOnClickListener {
             if (statusValue == ZedMediaStatus.STATUS_IDLE.statusValue) {
-                zedAudioPlayer?.prepared(
-                    File(
-                        Environment.getExternalStorageDirectory(),
-                        "Yasuo.mp3"
-                    ).absolutePath
-                )
+                mediaPath = File(
+                    Environment.getExternalStorageDirectory(),
+                    "Yasuo.mp3"
+                ).absolutePath
+                zedAudioPlayer?.prepared(mediaPath)
 //            zedAudioPlayer?.prepared("http://fs.ios.kugou.com/202004101153/93a93051133616d6866fc9557cce9118/G153/M04/13/14/OYcBAFz3fF6AbF0fADS_2OPt0ag626.mp3")
             }
         }
@@ -167,19 +168,18 @@ class ZedAudioActivity : AppCompatActivity() {
         stop.setOnClickListener {
             if (statusValue != ZedMediaStatus.STATUS_IDLE.statusValue && statusValue != ZedMediaStatus.STATUS_STOPING.statusValue)
                 statusValue = ZedMediaStatus.STATUS_STOPING.statusValue
-                zedAudioPlayer?.stop()
+            zedAudioPlayer?.stop()
         }
         next.setOnClickListener {
             if (statusValue != ZedMediaStatus.STATUS_STOPING.statusValue) {
-                if(statusValue != ZedMediaStatus.STATUS_IDLE.statusValue){
+                if (statusValue != ZedMediaStatus.STATUS_IDLE.statusValue) {
                     statusValue = ZedMediaStatus.STATUS_STOPING.statusValue
                 }
-                zedAudioPlayer?.next(
-                    File(
-                        Environment.getExternalStorageDirectory(),
-                        "告白の夜.mp3"
-                    ).absolutePath
-                )
+                mediaPath = File(
+                    Environment.getExternalStorageDirectory(),
+                    "告白の夜.mp3"
+                ).absolutePath
+                zedAudioPlayer?.next(mediaPath)
 //            zedAudioPlayer?.next("http://fs.ios.kugou.com/202004101026/7443d218bdfccf501004e288efeb8485/G151/M07/0E/19/d5QEAFz2MN-AJrB_ALDykLp1gS4802.mp3")
             }
         }
@@ -279,6 +279,20 @@ class ZedAudioActivity : AppCompatActivity() {
         stop_record.setOnClickListener {
             zedAudioPlayer?.stopRecord()
         }
+        jump_cut_pcm.setOnClickListener {
+            if (statusValue != ZedMediaStatus.STATUS_IDLE.statusValue && statusValue != ZedMediaStatus.STATUS_STOPING.statusValue)
+                statusValue = ZedMediaStatus.STATUS_STOPING.statusValue
+            zedAudioPlayer?.stop()
+            jumpToCutPcm()
+        }
+    }
+
+    private fun jumpToCutPcm() {
+        val intent = Intent(this, ZedCutAudioToPcmActivity::class.java)
+        intent.putExtra("media_path",mediaPath)
+        intent.putExtra("audio_player",zedAudioPlayer)
+        intent.putExtra("audio_status",statusValue)
+        startActivity(intent)
     }
 
     override fun onDestroy() {

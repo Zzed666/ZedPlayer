@@ -26,6 +26,7 @@ CCallJava::CCallJava(JavaVM *vm, JNIEnv *env, jobject obj) {
     jerrormid = jEnv->GetMethodID(claz, "cCallErrorBack", "(ILjava/lang/String;)V");
     jcompletemid = jEnv->GetMethodID(claz, "cCallCompleteBack", "()V");
     jpcmtoaacmid = jEnv->GetMethodID(claz, "cCallPcmToAACBack", "([BI)V");
+    jpcminfomid = jEnv->GetMethodID(claz, "cCallPcmInfoBack", "([BI)V");
 }
 
 CCallJava::~CCallJava() {
@@ -225,6 +226,31 @@ void CCallJava::callOnPcmToAAC(int cType, void *buffer, int bufferSize) {
         jbyteArray bufferArray = jniEnv->NewByteArray(bufferSize);
         jniEnv->SetByteArrayRegion(bufferArray, 0, bufferSize, static_cast<const jbyte *>(buffer));
         jniEnv->CallVoidMethod(jobj, jpcmtoaacmid,bufferArray,bufferSize);
+        jniEnv->DeleteLocalRef(bufferArray);
+        if (isAttached) {
+            jvm->DetachCurrentThread();
+        }
+    }
+}
+
+void CCallJava::callOnPcmInfo(int cType, void *buffer, int bufferSize) {
+    if (cType == CTHREADTYPE_MAIN) {
+        jbyteArray bufferArray = jEnv->NewByteArray(bufferSize);
+        jEnv->SetByteArrayRegion(bufferArray, 0, bufferSize, static_cast<const jbyte *>(buffer));
+        jEnv->CallVoidMethod(jobj, jpcminfomid,bufferArray,bufferSize);
+        jEnv->DeleteLocalRef(bufferArray);
+    } else if (cType == CTHREADTYPE_CHILD) {
+        JNIEnv *jniEnv;
+        bool isAttached = false;
+        if ((jvm->GetEnv((void **) &jniEnv, JNI_VERSION_1_6)) < 0) {
+            if (jvm->AttachCurrentThread(&jniEnv, 0)) {
+                return;
+            }
+            isAttached = true;
+        }
+        jbyteArray bufferArray = jniEnv->NewByteArray(bufferSize);
+        jniEnv->SetByteArrayRegion(bufferArray, 0, bufferSize, static_cast<const jbyte *>(buffer));
+        jniEnv->CallVoidMethod(jobj, jpcminfomid,bufferArray,bufferSize);
         jniEnv->DeleteLocalRef(bufferArray);
         if (isAttached) {
             jvm->DetachCurrentThread();

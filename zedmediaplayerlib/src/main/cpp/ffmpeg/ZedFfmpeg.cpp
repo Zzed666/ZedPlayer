@@ -178,7 +178,8 @@ void ZedFfmpeg::startAudio() {
         int ret = av_read_frame(pFormatCtx, pPacket);
         pthread_mutex_unlock(&seek_thread_mutex);
         if (ret == 0) {
-            if (zedAudio != nullptr && zedAudio->zedQueue != nullptr && pPacket->stream_index == zedAudio->audio_index) {
+            if (zedAudio != nullptr && zedAudio->zedQueue != nullptr &&
+                pPacket->stream_index == zedAudio->audio_index) {
                 zedAudio->zedQueue->putPackets(pPacket);
             } else {
                 av_packet_free(&pPacket);
@@ -283,6 +284,16 @@ void ZedFfmpeg::recordAudio(bool audio_record) {
     }
 }
 
+bool ZedFfmpeg::cutPcm(float startTime, float endTime, bool showPcm) {
+    if (startTime >= 0 && endTime > startTime
+        && endTime <= total_duration && zedAudio != nullptr) {
+        zedAudio->cutPcm(startTime,endTime,showPcm);
+        seekAudio(static_cast<int64_t>(startTime));
+        return true;
+    }
+    return false;
+}
+
 void ZedFfmpeg::stopAudio() {
 //    //为了防止av_read_frame = 0之后，判断getPacketSize = 0，zedStatus->exit设置为true的时候再调用stopAudio会直接return，所以这段注释掉
 //    if (zedStatus->exit) {
@@ -291,7 +302,7 @@ void ZedFfmpeg::stopAudio() {
 //        }
 //        return;
 //    }
-    if(zedStatus != nullptr){
+    if (zedStatus != nullptr) {
         zedStatus->exit = true;
     }
     int sleep_count = 0;

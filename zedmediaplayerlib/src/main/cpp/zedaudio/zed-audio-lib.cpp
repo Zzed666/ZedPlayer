@@ -235,3 +235,19 @@ Java_com_github_zedmediaplayerlib_audio_ZedAudioPlayer_n_1stop(JNIEnv *env,
         env->CallVoidMethod(obj, jnextmid, nextMediaPath_);
     }
 }
+
+extern "C" JNIEXPORT jboolean JNICALL
+Java_com_github_zedmediaplayerlib_audio_ZedAudioPlayer_n_1cutpcm(JNIEnv *env,
+                                                                 jobject obj,
+                                                                 jfloat startTime,
+                                                                 jfloat endTime,
+                                                                 jboolean showPcm) {
+    if (zedFfmpeg != nullptr) {
+        return static_cast<jboolean>(zedFfmpeg->cutPcm(startTime, endTime, showPcm));
+    } else {
+        if (FFMPEG_LOG) {
+            FFLOGE("ffmpeg cut pcm return because of it isn't initial!")
+        }
+        return static_cast<jboolean>(false);
+    }
+}

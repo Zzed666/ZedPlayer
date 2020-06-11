@@ -54,6 +54,19 @@ void openSLESBufferQueueCallBack(SLAndroidSimpleBufferQueueItf bufferQueueItf, v
                                                            zedAudio->sound_touch_buffer_16bit,
                                                            size * 2 * 2);
         }
+        //裁剪
+        if (zedAudio->is_allow_cut_pcm) {
+            if (zedAudio->clock_time > zedAudio->end_cut_time) {
+                if (zedAudio->zedStatus != nullptr) {
+                    zedAudio->zedStatus->exit = true;
+                }
+            }
+            if (zedAudio->is_allow_show_pcm) {
+                if (zedAudio->cCallJava != nullptr) {
+                    zedAudio->cCallJava->callOnPcmInfo(CTHREADTYPE_CHILD,zedAudio->sound_touch_buffer_16bit,size * 2 * 2);
+                }
+            }
+        }
     }
 }
 
@@ -383,6 +396,13 @@ void ZedAudio::pitch(float audio_pitch) {
 
 void ZedAudio::record(bool audio_record) {
     isrecord = audio_record;
+}
+
+void ZedAudio::cutPcm(float start_time, float end_time, bool show_pcm) {
+    is_allow_cut_pcm = true;
+    is_allow_show_pcm = show_pcm;
+    this->start_cut_time = start_time;
+    this->end_cut_time = end_time;
 }
 
 int ZedAudio::getCurrentSampleRate(int sample_rate) {
