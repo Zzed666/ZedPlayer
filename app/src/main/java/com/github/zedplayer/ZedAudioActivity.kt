@@ -149,7 +149,7 @@ class ZedAudioActivity : AppCompatActivity() {
             if (statusValue == ZedMediaStatus.STATUS_IDLE.statusValue) {
                 mediaPath = File(
                     Environment.getExternalStorageDirectory(),
-                    "Yasuo.mp3"
+                    "mojito.mp4"
                 ).absolutePath
                 zedAudioPlayer?.prepared(mediaPath)
 //            zedAudioPlayer?.prepared("http://fs.ios.kugou.com/202004101153/93a93051133616d6866fc9557cce9118/G153/M04/13/14/OYcBAFz3fF6AbF0fADS_2OPt0ag626.mp3")

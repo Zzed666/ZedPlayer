@@ -9,6 +9,7 @@ ZedAudio::ZedAudio(ZedStatus *zedStatus, CCallJava *cCallJava, int sample_rate) 
     this->cCallJava = cCallJava;
     this->sample_rate = sample_rate;
     zedQueue = new ZedQueue(zedStatus);
+    zedPcmBufferQueue = new ZedBufferQueue(zedStatus);
     out_buffer = (uint8_t *) (av_malloc(sample_rate * 2 * 2));
 
     soundTouch = new SoundTouch();
@@ -51,7 +52,11 @@ void openSLESBufferQueueCallBack(SLAndroidSimpleBufferQueueItf bufferQueueItf, v
             zedAudio->cCallJava->callOnDB(CTHREADTYPE_CHILD, zedAudio->getDB(
                     reinterpret_cast<char *>(zedAudio->sound_touch_buffer_16bit), size * 2 * 2));
         }
-        zedAudio->zedPcmBufferQueue->putPcmBuffer(zedAudio->sound_touch_buffer_16bit, size * 2 * 2);
+        //因为release的时候，最先delete的是zedPcmBufferQueue，而此时openSLES还没relese，所以这个队列可能还在运行，
+        // 如果没有zedAudio->zedPcmBufferQueue ！= null的判断，则会造成空指针异常
+        if (zedAudio->zedPcmBufferQueue != nullptr) {
+            zedAudio->zedPcmBufferQueue->putPcmBuffer(zedAudio->sound_touch_buffer_16bit, size * 2 * 2);
+        }
         //将重采样后的数据压入OpenSLES中的播放队列中
         if (size > 0) {
             (*zedAudio->androidSimpleBufferQueue)->Enqueue(zedAudio->androidSimpleBufferQueue,
@@ -401,7 +406,6 @@ void ZedAudio::setSplitPcmBuffer(bool split) {
 }
 
 void ZedAudio::splitPcmBuffer() {
-    zedPcmBufferQueue = new ZedBufferQueue(zedStatus);
     while (zedStatus != nullptr && !zedStatus->exit) {
         ZedPcmBean *zedPcmBean = nullptr;
         zedPcmBufferQueue->getPcmBuffer(&zedPcmBean);
