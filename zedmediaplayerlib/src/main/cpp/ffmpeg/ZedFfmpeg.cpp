@@ -280,14 +280,20 @@ void ZedFfmpeg::pitchAudio(float audio_pitch) {
 
 void ZedFfmpeg::recordAudio(bool audio_record) {
     if (zedAudio != nullptr) {
-        zedAudio->record(audio_record);
+        zedAudio->setRecord(audio_record);
+    }
+}
+
+void ZedFfmpeg::setAllowSplitPcm(bool allow_split) {
+    if (zedAudio != nullptr) {
+        zedAudio->setSplitPcmBuffer(allow_split);
     }
 }
 
 bool ZedFfmpeg::cutPcm(float startTime, float endTime, bool showPcm) {
     if (startTime >= 0 && endTime > startTime
         && endTime <= total_duration && zedAudio != nullptr) {
-        zedAudio->cutPcm(startTime,endTime,showPcm);
+        zedAudio->setCutPcm(startTime,endTime,showPcm);
         seekAudio(static_cast<int64_t>(startTime));
         return true;
     }

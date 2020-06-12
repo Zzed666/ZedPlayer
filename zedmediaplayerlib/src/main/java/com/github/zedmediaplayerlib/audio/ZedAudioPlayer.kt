@@ -52,6 +52,7 @@ class ZedAudioPlayer : Parcelable {
     private external fun n_speed(speed: Float)
     private external fun n_pitch(pitch: Float)
     private external fun n_record(record: Boolean)
+    private external fun n_setsplitpcm(allowSplit: Boolean)
     private external fun n_cutpcm(startTime: Float, endTime: Float, showPcm: Boolean): Boolean
 
     /**-------------------------------------------load---------------------------------------*/
@@ -286,4 +287,10 @@ class ZedAudioPlayer : Parcelable {
         onPcmInfoListener?.onPcmInfo(pcmBuffer, pcmBufferSize)
     }
     /**-------------------------------------------cut to pcm---------------------------------------*/
+
+    /**-------------------------------------------set split pcm---------------------------------------*/
+    fun splitPcm(allowSplit: Boolean) {
+        n_setsplitpcm(allowSplit)
+    }
+    /**-------------------------------------------set split pcm---------------------------------------*/
 }

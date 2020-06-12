@@ -33,6 +33,7 @@ class ZedCutAudioToPcmActivity : AppCompatActivity(){
             override fun onPrepared() {
                 Log.i("zzed", "cut:media is prepared to play")
                 zedAudioStatus = ZedMediaStatus.STATUS_PREPARED.statusValue
+                zedAudioPlayer?.splitPcm(true)
                 zedAudioPlayer?.cutAudioToPcm(30.0f,40.0f,true)
             }
         })

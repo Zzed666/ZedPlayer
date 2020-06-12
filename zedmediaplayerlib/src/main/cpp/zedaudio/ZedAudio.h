@@ -8,6 +8,8 @@
 #include "../queues/ZedQueue.h"
 #include "../status/ZedStatus.h"
 #include "../cjava/CCallJava.h"
+#include "../pcms/bufferqueues/ZedBufferQueue.h"
+#include "../pcms/beans/ZedPcmBean.h"
 #include "../soundtouch/include/SoundTouch.h"
 
 using namespace soundtouch;
@@ -27,10 +29,12 @@ public:
     float pitch_init = 1.0f;
     float start_cut_time = 0.0f;
     float end_cut_time = 0.0f;
+    int default_pcm_buffer_size = 4096;
     bool isrecord = false;
     bool isavpacketfinished = true;
     bool is_allow_cut_pcm = false;
     bool is_allow_show_pcm = false;
+    bool is_allow_split_pcm = false;
     uint8_t *out_buffer = nullptr;
     AVRational audio_time_base;
 
@@ -54,6 +58,7 @@ public:
     ZedQueue *zedQueue = nullptr;
     ZedStatus *zedStatus = nullptr;
     CCallJava *cCallJava = nullptr;
+    ZedBufferQueue *zedPcmBufferQueue = nullptr;
 
     SoundTouch *soundTouch = nullptr;
     SAMPLETYPE *sound_touch_buffer_16bit = nullptr;
@@ -61,6 +66,7 @@ public:
     bool sound_touch_sample_finished = true;
 
     pthread_t play_thread;
+    pthread_t split_pcm_thread;
 public:
     ZedAudio(ZedStatus *zedStatus, CCallJava *cCallJava, int sample_rate);
     ~ZedAudio();
@@ -75,8 +81,12 @@ public:
     void mute(int mute_channel);
     void speed(float audio_speed);
     void pitch(float audio_pitch);
-    void record(bool audio_record);
-    void cutPcm(float start_cut_time, float end_cut_time, bool show_pcm);
+    void setSplitPcmBuffer(bool split);
+    void splitPcmBuffer();
+    void setRecord(bool audio_record);
+    void record(char *buffer, int bufferSize);
+    void setCutPcm(float start_cut_time, float end_cut_time, bool show_pcm);
+    void cutPcm(char *buffer, int bufferSize);
     int getCurrentSampleRate(int sample_rate);
     void releaseTempSource(bool is_release_avpacket);
     void release();

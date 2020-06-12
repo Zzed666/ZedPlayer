@@ -69,6 +69,10 @@ add_library(jni-lib
 
         src/main/cpp/status/ZedStatus.cpp
 
+        src/main/cpp/pcms/beans/ZedPcmBean.cpp
+
+        src/main/cpp/pcms/bufferqueues/ZedBufferQueue.cpp
+
 
         src/main/cpp/soundtouch/source/AAFilter.cpp
 

@@ -37,7 +37,7 @@ class ZedMediaHelper(private var onRecordListener: OnRecordListener?) {
         }?.apply {
             setInteger(MediaFormat.KEY_AAC_PROFILE, MediaCodecInfo.CodecProfileLevel.AACObjectLC)
         }?.apply {
-            setInteger(MediaFormat.KEY_MAX_INPUT_SIZE, 6144)
+            setInteger(MediaFormat.KEY_MAX_INPUT_SIZE, 4096)
         }?.let { mediaFormat ->
             //创建audio_media_codec
             audioEncoder = MediaCodec.createEncoderByType(MediaFormat.MIMETYPE_AUDIO_AAC)

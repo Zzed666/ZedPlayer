@@ -66,6 +66,7 @@ class ZedAudioActivity : AppCompatActivity() {
                 zedAudioPlayer?.volume(volumeValue)
                 zedAudioPlayer?.mute(muteValue)
                 statusValue = ZedMediaStatus.STATUS_PREPARED.statusValue
+                zedAudioPlayer?.splitPcm(true)
                 zedAudioPlayer?.start()
             }
         })

@@ -236,6 +236,19 @@ Java_com_github_zedmediaplayerlib_audio_ZedAudioPlayer_n_1stop(JNIEnv *env,
     }
 }
 
+extern "C" JNIEXPORT void JNICALL
+Java_com_github_zedmediaplayerlib_audio_ZedAudioPlayer_n_1setsplitpcm(JNIEnv *env,
+                                                                 jobject obj,
+                                                                 jboolean allowSplit) {
+    if (zedFfmpeg != nullptr) {
+        zedFfmpeg->setAllowSplitPcm(allowSplit);
+    } else {
+        if (FFMPEG_LOG) {
+            FFLOGE("ffmpeg set split pcm return because of it isn't initial!")
+        }
+    }
+}
+
 extern "C" JNIEXPORT jboolean JNICALL
 Java_com_github_zedmediaplayerlib_audio_ZedAudioPlayer_n_1cutpcm(JNIEnv *env,
                                                                  jobject obj,

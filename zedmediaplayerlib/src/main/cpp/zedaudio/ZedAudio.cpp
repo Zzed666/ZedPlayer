@@ -29,6 +29,14 @@ void *playThreadCallBack(void *data) {
     pthread_exit(&zedAudio->play_thread);
 }
 
+void *splitPcmCallBack(void *data) {
+    auto *zedAudio = (ZedAudio *) data;
+    if (zedAudio != nullptr) {
+        zedAudio->splitPcmBuffer();
+    }
+    pthread_exit(&zedAudio->split_pcm_thread);
+}
+
 void openSLESBufferQueueCallBack(SLAndroidSimpleBufferQueueItf bufferQueueItf, void *context) {
     auto *zedAudio = (ZedAudio *) context;
     if (zedAudio != nullptr) {
@@ -42,12 +50,8 @@ void openSLESBufferQueueCallBack(SLAndroidSimpleBufferQueueItf bufferQueueItf, v
                                                 zedAudio->clock_time);
             zedAudio->cCallJava->callOnDB(CTHREADTYPE_CHILD, zedAudio->getDB(
                     reinterpret_cast<char *>(zedAudio->sound_touch_buffer_16bit), size * 2 * 2));
-            if (zedAudio->isrecord) {
-                zedAudio->cCallJava->callOnPcmToAAC(CTHREADTYPE_CHILD,
-                                                    zedAudio->sound_touch_buffer_16bit,
-                                                    size * 2 * 2);
-            }
         }
+        zedAudio->zedPcmBufferQueue->putPcmBuffer(zedAudio->sound_touch_buffer_16bit, size * 2 * 2);
         //将重采样后的数据压入OpenSLES中的播放队列中
         if (size > 0) {
             (*zedAudio->androidSimpleBufferQueue)->Enqueue(zedAudio->androidSimpleBufferQueue,
@@ -61,17 +65,15 @@ void openSLESBufferQueueCallBack(SLAndroidSimpleBufferQueueItf bufferQueueItf, v
                     zedAudio->zedStatus->exit = true;
                 }
             }
-            if (zedAudio->is_allow_show_pcm) {
-                if (zedAudio->cCallJava != nullptr) {
-                    zedAudio->cCallJava->callOnPcmInfo(CTHREADTYPE_CHILD,zedAudio->sound_touch_buffer_16bit,size * 2 * 2);
-                }
-            }
         }
     }
 }
 
 void ZedAudio::play() {
     pthread_create(&play_thread, nullptr, playThreadCallBack, this);
+    if (is_allow_split_pcm) {
+        pthread_create(&split_pcm_thread, nullptr, splitPcmCallBack, this);
+    }
 }
 
 void ZedAudio::prepareOpenSELS() {
@@ -394,15 +396,83 @@ void ZedAudio::pitch(float audio_pitch) {
     }
 }
 
-void ZedAudio::record(bool audio_record) {
+void ZedAudio::setSplitPcmBuffer(bool split) {
+    is_allow_split_pcm = split;
+}
+
+void ZedAudio::splitPcmBuffer() {
+    zedPcmBufferQueue = new ZedBufferQueue(zedStatus);
+    while (zedStatus != nullptr && !zedStatus->exit) {
+        ZedPcmBean *zedPcmBean = nullptr;
+        zedPcmBufferQueue->getPcmBuffer(&zedPcmBean);
+        if (zedPcmBean == nullptr) {
+            continue;
+        } else {
+            if (zedPcmBean->pcmBufferSize <= default_pcm_buffer_size) {
+                record(zedPcmBean->pcmBuffer, zedPcmBean->pcmBufferSize);
+                cutPcm(zedPcmBean->pcmBuffer, zedPcmBean->pcmBufferSize);
+            } else {
+                int split_pcm_num =
+                        zedPcmBean->pcmBufferSize / default_pcm_buffer_size;
+                int split_pcm_surplus_size =
+                        zedPcmBean->pcmBufferSize % default_pcm_buffer_size;
+                for (int i = 0; i < split_pcm_num; i++) {
+                    char *bf = static_cast<char *>(malloc(default_pcm_buffer_size));
+                    memcpy(bf, zedPcmBean->pcmBuffer + i * default_pcm_buffer_size,
+                           default_pcm_buffer_size);
+                    record(bf, default_pcm_buffer_size);
+                    cutPcm(bf, default_pcm_buffer_size);
+                    free(bf);
+                    bf = nullptr;
+                }
+                if (split_pcm_surplus_size > 0) {
+                    char *bf = static_cast<char *>(malloc(split_pcm_surplus_size));
+                    memcpy(bf, zedPcmBean->pcmBuffer +
+                               split_pcm_num * default_pcm_buffer_size,
+                           split_pcm_surplus_size);
+                    record(bf, split_pcm_surplus_size);
+                    cutPcm(bf, split_pcm_surplus_size);
+                    free(bf);
+                    bf = nullptr;
+                }
+            }
+        }
+        delete (zedPcmBean);
+        zedPcmBean = nullptr;
+    }
+}
+
+void ZedAudio::setRecord(bool audio_record) {
     isrecord = audio_record;
 }
 
-void ZedAudio::cutPcm(float start_time, float end_time, bool show_pcm) {
+void ZedAudio::record(char *buffer, int bufferSize) {
+    if (isrecord) {
+        cCallJava->callOnPcmToAAC(CTHREADTYPE_CHILD,
+                                  buffer,
+                                  bufferSize);
+    }
+}
+
+void ZedAudio::setCutPcm(float start_time, float end_time, bool show_pcm) {
     is_allow_cut_pcm = true;
     is_allow_show_pcm = show_pcm;
     this->start_cut_time = start_time;
     this->end_cut_time = end_time;
+}
+
+void ZedAudio::cutPcm(char *buffer, int bufferSize) {
+    //裁剪
+    if (is_allow_cut_pcm && is_allow_show_pcm && cCallJava != nullptr) {
+//        if (clock_time > end_cut_time) {
+//            if (zedStatus != nullptr) {
+//                zedStatus->exit = true;
+//            }
+//        }
+        cCallJava->callOnPcmInfo(CTHREADTYPE_CHILD,
+                                 buffer,
+                                 bufferSize);
+    }
 }
 
 int ZedAudio::getCurrentSampleRate(int sample_rate) {
@@ -472,6 +542,13 @@ void ZedAudio::releaseTempSource(bool isReleaseAVPacket) {
 }
 
 void ZedAudio::release() {
+    if (zedPcmBufferQueue != nullptr) {
+        zedPcmBufferQueue->noticeThread();
+        pthread_join(split_pcm_thread, nullptr);
+        zedPcmBufferQueue->release();
+        delete(zedPcmBufferQueue);
+        zedPcmBufferQueue = nullptr;
+    }
     if (zedQueue != nullptr) {
         delete (zedQueue);
         zedQueue = nullptr;

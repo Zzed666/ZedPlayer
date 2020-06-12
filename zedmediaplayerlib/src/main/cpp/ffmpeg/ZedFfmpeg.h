@@ -40,6 +40,7 @@ public:
     void pitchAudio(float pitch);
     void recordAudio(bool record);
     void stopAudio();
+    void setAllowSplitPcm(bool allow_split);
     bool cutPcm(float startTime, float endTime, bool showPcm);
     void release();
 };
