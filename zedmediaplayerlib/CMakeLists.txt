@@ -57,7 +57,9 @@ add_library(jni-lib
 
         src/main/cpp/native-lib.cpp
 
-        src/main/cpp/zedaudio/zed-audio-lib.cpp
+        src/main/cpp/zed-player-lib.cpp
+
+#        src/main/cpp/zedaudio/zed-audio-lib.cpp
 
         src/main/cpp/ffmpeg/ZedFfmpeg.cpp
 

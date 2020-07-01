@@ -5,9 +5,9 @@
 #include <jni.h>
 #include <string>
 
-#include "../JniDefine.h"
-#include "../ffmpeg/ZedFfmpeg.h"
-#include "../status/ZedStatus.h"
+#include "JniDefine.h"
+#include "ffmpeg/ZedFfmpeg.h"
+#include "status/ZedStatus.h"
 
 JavaVM *javaVm = nullptr;
 ZedFfmpeg *zedFfmpeg = nullptr;
