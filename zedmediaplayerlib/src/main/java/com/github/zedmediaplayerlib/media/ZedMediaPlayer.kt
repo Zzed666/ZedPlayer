@@ -1,17 +1,17 @@
-package com.github.zedmediaplayerlib.audio
+package com.github.zedmediaplayerlib.media
 
 import android.annotation.SuppressLint
 import android.os.Build
 import android.os.Parcelable
 import androidx.annotation.RequiresApi
-import com.github.zedmediaplayerlib.audio.listener.*
+import com.github.zedmediaplayerlib.listener.*
 import com.github.zedmediaplayerlib.commons.ZedMediaHelper
 import kotlinx.android.parcel.Parcelize
 import java.io.File
 
 @SuppressLint("ParcelCreator")
 @Parcelize
-class ZedAudioPlayer : Parcelable {
+class ZedMediaPlayer : Parcelable {
     private var onLoadListener: OnLoadListener? = null
     private var onPreparedListener: OnPreparedListener? = null
     private var onPauseListener: OnPauseListener? = null

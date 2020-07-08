@@ -17,10 +17,10 @@ import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
-import kotlinx.android.synthetic.main.activity_zed_audio.*
+import kotlinx.android.synthetic.main.activity_zed_media.*
 import java.io.File
 
-class ZedAudioActivity : AppCompatActivity() {
+class ZedMediaActivity : AppCompatActivity() {
     var zedMediaPlayer: ZedMediaPlayer? = null
     private val disposables = CompositeDisposable()
     var mediaPath: String = ""
@@ -34,7 +34,7 @@ class ZedAudioActivity : AppCompatActivity() {
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_zed_audio)
+        setContentView(R.layout.activity_zed_media)
         initDatas()
         initEvents()
     }
@@ -149,7 +149,7 @@ class ZedAudioActivity : AppCompatActivity() {
             if (statusValue == ZedMediaStatus.STATUS_IDLE.statusValue) {
                 mediaPath = File(
                     Environment.getExternalStorageDirectory(),
-                    "Yasuo.mp3"
+                    "mojito.mp4"
                 ).absolutePath
                 zedMediaPlayer?.prepared(mediaPath)
 //            zedAudioPlayer?.prepared("http://fs.ios.kugou.com/202004101153/93a93051133616d6866fc9557cce9118/G153/M04/13/14/OYcBAFz3fF6AbF0fADS_2OPt0ag626.mp3")
@@ -194,7 +194,7 @@ class ZedAudioActivity : AppCompatActivity() {
                             position = totalDuration * progress / 100
                         } else if (totalDuration < 0) {
                             Toast.makeText(
-                                this@ZedAudioActivity,
+                                this@ZedMediaActivity,
                                 "media source isn't prepare!",
                                 Toast.LENGTH_SHORT
                             ).show()

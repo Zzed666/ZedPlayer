@@ -19,6 +19,7 @@
         </activity>
         <activity android:name=".ZedAudioActivity" />
         <activity android:name=".ZedCutAudioToPcmActivity" />
+        <activity android:name=".ZedMediaActivity" />
     </application>
 
     <uses-permission android:name="android.permission.INTERNET"/>

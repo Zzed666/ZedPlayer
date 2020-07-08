@@ -16,4 +16,14 @@
         app:layout_constraintTop_toTopOf="parent"
         android:layout_marginTop="20dp"/>
 
+    <Button
+        android:id="@+id/zed_media"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="ZedMedia"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/zed_audio"
+        android:layout_marginTop="20dp"/>
+
 </androidx.constraintlayout.widget.ConstraintLayout>

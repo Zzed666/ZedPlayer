@@ -28,7 +28,7 @@ JNI_OnLoad(JavaVM *vm, void *reversed) {
 }
 
 extern "C" JNIEXPORT void JNICALL
-Java_com_github_zedmediaplayerlib_audio_ZedAudioPlayer_n_1prepared(JNIEnv *env,
+Java_com_github_zedmediaplayerlib_media_ZedMediaPlayer_n_1prepared(JNIEnv *env,
                                                                    jobject obj,
                                                                    jstring mediaPath_) {
     const char *mediaPath = env->GetStringUTFChars(mediaPath_, 0);
@@ -51,18 +51,18 @@ Java_com_github_zedmediaplayerlib_audio_ZedAudioPlayer_n_1prepared(JNIEnv *env,
 //    env->ReleaseStringUTFChars(mediaPath_, mediaPath);
 }
 
-void *startAudioThread(void *data) {
+void *startMediaThread(void *data) {
     auto zedFfmpeg = (ZedFfmpeg *) data;
-    zedFfmpeg->startAudio();
+    zedFfmpeg->startMedia();
     pthread_exit(&ffmpeg_start_thread);
 }
 
 extern "C" JNIEXPORT void JNICALL
-Java_com_github_zedmediaplayerlib_audio_ZedAudioPlayer_n_1start(JNIEnv *env,
+Java_com_github_zedmediaplayerlib_media_ZedMediaPlayer_n_1start(JNIEnv *env,
                                                                 jobject obj) {
     if (zedFfmpeg != nullptr) {
 //        zedFfmpeg->startAudio();
-        pthread_create(&ffmpeg_start_thread, nullptr, startAudioThread, zedFfmpeg);
+        pthread_create(&ffmpeg_start_thread, nullptr, startMediaThread, zedFfmpeg);
     } else {
         if (FFMPEG_LOG) {
             FFLOGE("ffmpeg start return because of it isn't initial!")
@@ -72,11 +72,11 @@ Java_com_github_zedmediaplayerlib_audio_ZedAudioPlayer_n_1start(JNIEnv *env,
 }
 
 extern "C" JNIEXPORT void JNICALL
-Java_com_github_zedmediaplayerlib_audio_ZedAudioPlayer_n_1pause(JNIEnv *env,
+Java_com_github_zedmediaplayerlib_media_ZedMediaPlayer_n_1pause(JNIEnv *env,
                                                                 jobject obj,
                                                                 jboolean is_pause) {
     if (zedFfmpeg != nullptr) {
-        zedFfmpeg->pauseAudio(is_pause);
+        zedFfmpeg->pauseMedia(is_pause);
     } else {
         if (FFMPEG_LOG) {
             if (is_pause) {
@@ -90,11 +90,11 @@ Java_com_github_zedmediaplayerlib_audio_ZedAudioPlayer_n_1pause(JNIEnv *env,
 }
 
 extern "C" JNIEXPORT void JNICALL
-Java_com_github_zedmediaplayerlib_audio_ZedAudioPlayer_n_1seek(JNIEnv *env,
+Java_com_github_zedmediaplayerlib_media_ZedMediaPlayer_n_1seek(JNIEnv *env,
                                                                jobject obj,
                                                                jint seek_time) {
     if (zedFfmpeg != nullptr) {
-        zedFfmpeg->seekAudio(seek_time);
+        zedFfmpeg->seekMedia(seek_time);
     } else {
         if (FFMPEG_LOG) {
             FFLOGE("ffmpeg seek return because of it isn't initial!")
@@ -104,11 +104,11 @@ Java_com_github_zedmediaplayerlib_audio_ZedAudioPlayer_n_1seek(JNIEnv *env,
 }
 
 extern "C" JNIEXPORT void JNICALL
-Java_com_github_zedmediaplayerlib_audio_ZedAudioPlayer_n_1volume(JNIEnv *env,
+Java_com_github_zedmediaplayerlib_media_ZedMediaPlayer_n_1volume(JNIEnv *env,
                                                                  jobject obj,
                                                                  jint volume_percent) {
     if (zedFfmpeg != nullptr) {
-        zedFfmpeg->volumeAudio(volume_percent);
+        zedFfmpeg->volumeMedia(volume_percent);
     } else {
         if (FFMPEG_LOG) {
             FFLOGE("ffmpeg volume return because of it isn't initial!")
@@ -118,11 +118,11 @@ Java_com_github_zedmediaplayerlib_audio_ZedAudioPlayer_n_1volume(JNIEnv *env,
 }
 
 extern "C" JNIEXPORT void JNICALL
-Java_com_github_zedmediaplayerlib_audio_ZedAudioPlayer_n_1mute(JNIEnv *env,
+Java_com_github_zedmediaplayerlib_media_ZedMediaPlayer_n_1mute(JNIEnv *env,
                                                                jobject obj,
                                                                jint mute_channel) {
     if (zedFfmpeg != nullptr) {
-        zedFfmpeg->muteAudio(mute_channel);
+        zedFfmpeg->muteMedia(mute_channel);
     } else {
         if (FFMPEG_LOG) {
             FFLOGE("ffmpeg mute return because of it isn't initial!")
@@ -132,11 +132,11 @@ Java_com_github_zedmediaplayerlib_audio_ZedAudioPlayer_n_1mute(JNIEnv *env,
 }
 
 extern "C" JNIEXPORT void JNICALL
-Java_com_github_zedmediaplayerlib_audio_ZedAudioPlayer_n_1speed(JNIEnv *env,
+Java_com_github_zedmediaplayerlib_media_ZedMediaPlayer_n_1speed(JNIEnv *env,
                                                                 jobject obj,
                                                                 jfloat speed) {
     if (zedFfmpeg != nullptr) {
-        zedFfmpeg->speedAudio(speed);
+        zedFfmpeg->speedMedia(speed);
     } else {
         if (FFMPEG_LOG) {
             FFLOGE("ffmpeg speed return because of it isn't initial!")
@@ -146,11 +146,11 @@ Java_com_github_zedmediaplayerlib_audio_ZedAudioPlayer_n_1speed(JNIEnv *env,
 }
 
 extern "C" JNIEXPORT void JNICALL
-Java_com_github_zedmediaplayerlib_audio_ZedAudioPlayer_n_1pitch(JNIEnv *env,
+Java_com_github_zedmediaplayerlib_media_ZedMediaPlayer_n_1pitch(JNIEnv *env,
                                                                 jobject obj,
                                                                 jfloat pitch) {
     if (zedFfmpeg != nullptr) {
-        zedFfmpeg->pitchAudio(pitch);
+        zedFfmpeg->pitchMedia(pitch);
     } else {
         if (FFMPEG_LOG) {
             FFLOGE("ffmpeg pitch return because of it isn't initial!")
@@ -160,11 +160,11 @@ Java_com_github_zedmediaplayerlib_audio_ZedAudioPlayer_n_1pitch(JNIEnv *env,
 }
 
 extern "C" JNIEXPORT void JNICALL
-Java_com_github_zedmediaplayerlib_audio_ZedAudioPlayer_n_1record(JNIEnv *env,
+Java_com_github_zedmediaplayerlib_media_ZedMediaPlayer_n_1record(JNIEnv *env,
                                                                  jobject obj,
                                                                  jboolean record) {
     if (zedFfmpeg != nullptr) {
-        zedFfmpeg->recordAudio(record);
+        zedFfmpeg->recordMedia(record);
     } else {
         if (FFMPEG_LOG) {
             FFLOGE("ffmpeg record return because of it isn't initial!")
@@ -174,7 +174,7 @@ Java_com_github_zedmediaplayerlib_audio_ZedAudioPlayer_n_1record(JNIEnv *env,
 }
 
 extern "C" JNIEXPORT jint JNICALL
-Java_com_github_zedmediaplayerlib_audio_ZedAudioPlayer_n_1duration(JNIEnv *env,
+Java_com_github_zedmediaplayerlib_media_ZedMediaPlayer_n_1duration(JNIEnv *env,
                                                                    jobject obj) {
     if (zedFfmpeg != nullptr) {
         return zedFfmpeg->total_duration;
@@ -187,7 +187,7 @@ Java_com_github_zedmediaplayerlib_audio_ZedAudioPlayer_n_1duration(JNIEnv *env,
 }
 
 extern "C" JNIEXPORT jint JNICALL
-Java_com_github_zedmediaplayerlib_audio_ZedAudioPlayer_n_1samplerate(JNIEnv *env,
+Java_com_github_zedmediaplayerlib_media_ZedMediaPlayer_n_1samplerate(JNIEnv *env,
                                                                      jobject obj) {
     if (zedFfmpeg != nullptr) {
         return zedFfmpeg->sample_rate;
@@ -200,7 +200,7 @@ Java_com_github_zedmediaplayerlib_audio_ZedAudioPlayer_n_1samplerate(JNIEnv *env
 }
 
 extern "C" JNIEXPORT void JNICALL
-Java_com_github_zedmediaplayerlib_audio_ZedAudioPlayer_n_1stop(JNIEnv *env,
+Java_com_github_zedmediaplayerlib_media_ZedMediaPlayer_n_1stop(JNIEnv *env,
                                                                jobject obj,
                                                                jboolean skipNext,
                                                                jstring nextMediaPath_) {
@@ -211,7 +211,7 @@ Java_com_github_zedmediaplayerlib_audio_ZedAudioPlayer_n_1stop(JNIEnv *env,
         }
         FFLOGI("ffmpeg stopping");
         ffmpeg_stop_complete = false;
-        zedFfmpeg->stopAudio();
+        zedFfmpeg->stopMedia();
         if (zedStatus != nullptr) {
             delete (zedStatus);
             zedStatus = nullptr;
@@ -237,7 +237,7 @@ Java_com_github_zedmediaplayerlib_audio_ZedAudioPlayer_n_1stop(JNIEnv *env,
 }
 
 extern "C" JNIEXPORT void JNICALL
-Java_com_github_zedmediaplayerlib_audio_ZedAudioPlayer_n_1setsplitpcm(JNIEnv *env,
+Java_com_github_zedmediaplayerlib_media_ZedMediaPlayer_n_1setsplitpcm(JNIEnv *env,
                                                                  jobject obj,
                                                                  jboolean allowSplit) {
     if (zedFfmpeg != nullptr) {
@@ -250,7 +250,7 @@ Java_com_github_zedmediaplayerlib_audio_ZedAudioPlayer_n_1setsplitpcm(JNIEnv *en
 }
 
 extern "C" JNIEXPORT jboolean JNICALL
-Java_com_github_zedmediaplayerlib_audio_ZedAudioPlayer_n_1cutpcm(JNIEnv *env,
+Java_com_github_zedmediaplayerlib_media_ZedMediaPlayer_n_1cutpcm(JNIEnv *env,
                                                                  jobject obj,
                                                                  jfloat startTime,
                                                                  jfloat endTime,

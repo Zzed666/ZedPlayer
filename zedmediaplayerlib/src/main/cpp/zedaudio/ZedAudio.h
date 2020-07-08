@@ -38,7 +38,6 @@ public:
     uint8_t *out_buffer = nullptr;
     AVRational audio_time_base;
 
-    AVCodec *pAvCodec = nullptr;
     AVCodecContext *pAvCodecCtx = nullptr;
     AVPacket *pAvPacket = nullptr;
     AVFrame *pAvFrame = nullptr;

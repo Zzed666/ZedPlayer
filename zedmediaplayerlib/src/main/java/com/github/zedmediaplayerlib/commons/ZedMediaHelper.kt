@@ -6,7 +6,7 @@ import android.media.MediaFormat
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
-import com.github.zedmediaplayerlib.audio.listener.OnRecordListener
+import com.github.zedmediaplayerlib.listener.OnRecordListener
 import java.io.File
 import java.io.FileOutputStream
 

@@ -67,6 +67,8 @@ add_library(jni-lib
 
         src/main/cpp/zedaudio/ZedAudio.cpp
 
+        src/main/cpp/zedvideo/ZedVideo.cpp
+
         src/main/cpp/queues/ZedQueue.cpp
 
         src/main/cpp/status/ZedStatus.cpp

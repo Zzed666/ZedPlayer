@@ -1,4 +1,4 @@
-package com.github.zedmediaplayerlib.audio.listener
+package com.github.zedmediaplayerlib.listener
 
 interface OnNextListener {
     fun onNext(path: String)

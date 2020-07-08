@@ -1,4 +1,4 @@
-package com.github.zedmediaplayerlib.audio.listener
+package com.github.zedmediaplayerlib.listener
 
 interface OnPcmInfoListener {
     fun onPcmSmapleRate(pcmSampleRate: Int)

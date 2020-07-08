@@ -46,5 +46,8 @@ class MainActivity : AppCompatActivity() {
         zed_audio.setOnClickListener {
             startActivity(Intent(this,ZedAudioActivity::class.java))
         }
+        zed_media.setOnClickListener {
+            startActivity(Intent(this,ZedMediaActivity::class.java))
+        }
     }
 }
