@@ -49,5 +49,8 @@ class MainActivity : AppCompatActivity() {
         zed_media.setOnClickListener {
             startActivity(Intent(this,ZedMediaActivity::class.java))
         }
+        zed_gles.setOnClickListener {
+            startActivity(Intent(this,ZedGLESActivity::class.java))
+        }
     }
 }
