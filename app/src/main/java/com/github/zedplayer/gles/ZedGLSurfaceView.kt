@@ -14,6 +14,6 @@ class ZedGLSurfaceView @JvmOverloads constructor(
     init {
         setEGLContextClientVersion(2)
         setRenderer(ZedRender(mContext))
-        renderMode = GLSurfaceView.RENDERMODE_WHEN_DIRTY
+        renderMode = RENDERMODE_WHEN_DIRTY
     }
 }
