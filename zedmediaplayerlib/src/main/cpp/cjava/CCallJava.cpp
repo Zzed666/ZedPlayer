@@ -27,6 +27,7 @@ CCallJava::CCallJava(JavaVM *vm, JNIEnv *env, jobject obj) {
     jcompletemid = jEnv->GetMethodID(claz, "cCallCompleteBack", "()V");
     jpcmtoaacmid = jEnv->GetMethodID(claz, "cCallPcmToAACBack", "([BI)V");
     jpcminfomid = jEnv->GetMethodID(claz, "cCallPcmInfoBack", "([BI)V");
+    jrenderyuvmid = jEnv->GetMethodID(claz, "cCallRenderYUVBack", "(II[B[B[B)V");
 }
 
 CCallJava::~CCallJava() {
@@ -252,6 +253,45 @@ void CCallJava::callOnPcmInfo(int cType, void *buffer, int bufferSize) {
         jniEnv->SetByteArrayRegion(bufferArray, 0, bufferSize, static_cast<const jbyte *>(buffer));
         jniEnv->CallVoidMethod(jobj, jpcminfomid,bufferArray,bufferSize);
         jniEnv->DeleteLocalRef(bufferArray);
+        if (isAttached) {
+            jvm->DetachCurrentThread();
+        }
+    }
+}
+
+void CCallJava::callOnRenderYUV(int cType, int width, int height, uint8_t *y, uint8_t *u, uint8_t *v) {
+    if (cType == CTHREADTYPE_MAIN) {
+        jbyteArray yArray = jEnv->NewByteArray(width * height);
+        jEnv->SetByteArrayRegion(yArray, 0, width * height, reinterpret_cast<const jbyte *>(y));
+        jbyteArray uArray = jEnv->NewByteArray(width * height / 4);
+        jEnv->SetByteArrayRegion(uArray, 0, width * height / 4, reinterpret_cast<const jbyte *>(u));
+        jbyteArray vArray = jEnv->NewByteArray(width * height / 4);
+        jEnv->SetByteArrayRegion(vArray, 0, width * height / 4, reinterpret_cast<const jbyte *>(v));
+        jEnv->CallVoidMethod(jobj, jrenderyuvmid,width,height,yArray,uArray,vArray);
+        jEnv->DeleteLocalRef(yArray);
+        jEnv->DeleteLocalRef(uArray);
+        jEnv->DeleteLocalRef(vArray);
+    } else if (cType == CTHREADTYPE_CHILD) {
+        JNIEnv *jniEnv;
+        bool isAttached = false;
+        if ((jvm->GetEnv((void **) &jniEnv, JNI_VERSION_1_6)) < 0) {
+            if (jvm->AttachCurrentThread(&jniEnv, 0)) {
+                return;
+            }
+            isAttached = true;
+        }
+        //y:uv = 4 : 1
+        jbyteArray yArray = jniEnv->NewByteArray(width * height);
+        jniEnv->SetByteArrayRegion(yArray, 0, width * height, reinterpret_cast<const jbyte *>(y));
+        jbyteArray uArray = jniEnv->NewByteArray(width * height / 4);
+        jniEnv->SetByteArrayRegion(uArray, 0, width * height / 4, reinterpret_cast<const jbyte *>(u));
+        jbyteArray vArray = jniEnv->NewByteArray(width * height / 4);
+        jniEnv->SetByteArrayRegion(vArray, 0, width * height / 4, reinterpret_cast<const jbyte *>(v));
+        jniEnv->CallVoidMethod(jobj, jrenderyuvmid,width,height,yArray,uArray,vArray);
+
+        jniEnv->DeleteLocalRef(yArray);
+        jniEnv->DeleteLocalRef(uArray);
+        jniEnv->DeleteLocalRef(vArray);
         if (isAttached) {
             jvm->DetachCurrentThread();
         }

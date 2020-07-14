@@ -29,6 +29,7 @@ public:
     jmethodID jcompletemid = nullptr;
     jmethodID jpcmtoaacmid = nullptr;
     jmethodID jpcminfomid = nullptr;
+    jmethodID jrenderyuvmid = nullptr;
 public:
     CCallJava(JavaVM *vm, JNIEnv *env, jobject obj);
     ~CCallJava();
@@ -43,6 +44,7 @@ public:
     void callOnComplete(int cType);
     void callOnPcmToAAC(int cType, void *buffer, int bufferSize);
     void callOnPcmInfo(int cType, void *buffer, int bufferSize);
+    void callOnRenderYUV(int cType, int width, int height, uint8_t *y, uint8_t *u, uint8_t *v);
 };
 
 

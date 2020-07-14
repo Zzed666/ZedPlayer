@@ -3,6 +3,7 @@ package com.github.zedmediaplayerlib.media
 import android.annotation.SuppressLint
 import android.os.Build
 import android.os.Parcelable
+import android.util.Log
 import androidx.annotation.RequiresApi
 import com.github.zedmediaplayerlib.listener.*
 import com.github.zedmediaplayerlib.commons.ZedMediaHelper
@@ -293,4 +294,10 @@ class ZedMediaPlayer : Parcelable {
         n_setsplitpcm(allowSplit)
     }
     /**-------------------------------------------set split pcm---------------------------------------*/
+
+    /**-------------------------------------------render yuv---------------------------------------*/
+    fun cCallRenderYUVBack(width: Int, height: Int, yArray: ByteArray, uArray: ByteArray, vArray: ByteArray) {
+        Log.e("wszed","cCallRenderYUVBack:width:$width,height:$height")
+    }
+    /**-------------------------------------------render yuv---------------------------------------*/
 }

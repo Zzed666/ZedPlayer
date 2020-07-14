@@ -16,6 +16,10 @@ public:
     bool hasExitDecodeThread = true;
 
     AVCodecContext *pMediaAvCodecCtx = nullptr;
+    AVPacket *pMediaAvPacket = nullptr;
+    AVFrame *pMediaAvFrame = nullptr;
+    SwsContext *pSwsCtx = nullptr;
+
     ZedStatus *zedMediaStatus = nullptr;
     CCallJava *cMediaCallJava = nullptr;
     ZedQueue *zedMediaQueue = nullptr;
@@ -26,6 +30,8 @@ public:
     ZedVideo(ZedStatus *zedStatus, CCallJava *cCallJava);
     void play();
     void decode();
+    int renderYUV();
+    void releaseTempSource(bool is_release_avpacket);
     void release();
     ~ZedVideo();
 };

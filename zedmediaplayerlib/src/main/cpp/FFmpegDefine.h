@@ -11,7 +11,9 @@ extern "C" {
 #include <libavformat/avformat.h>
 #include <libavcodec/avcodec.h>
 #include <libavutil/time.h>
+#include <libavutil/imgutils.h>
 #include <libswresample/swresample.h>
+#include <libswscale/swscale.h>
 #include <SLES/OpenSLES.h>
 #include <SLES/OpenSLES_Android.h>
 };
