@@ -106,13 +106,6 @@ class ZedMediaActivity : AppCompatActivity() {
         zedMediaPlayer?.setOnPlayTimeListener(object : OnPlayTimeListener {
             @SuppressLint("SetTextI18n")
             override fun onPlayTime(totalTime: Int, currentTime: Int) {
-//                Log.i(
-//                    "zzed",
-//                    "${ZedTimeUtil.secdsToDateFormat(
-//                        totalTime,
-//                        totalTime
-//                    )}/${ZedTimeUtil.secdsToDateFormat(currentTime, totalTime)}"
-//                )
                 runOnUiThread(Runnable {
                     play_time.text = "${ZedTimeUtil.secdsToDateFormat(
                         totalTime,
@@ -144,6 +137,19 @@ class ZedMediaActivity : AppCompatActivity() {
             override fun onRecord(time: Int) {
                 Log.i("zzed", "media record time is $time.")
             }
+        })
+        zedMediaPlayer?.setOnRenderYUVListener(object : OnRenderYUVListener {
+            override fun onRenderYUV(
+                width: Int,
+                height: Int,
+                yArray: ByteArray,
+                uArray: ByteArray,
+                vArray: ByteArray
+            ) {
+                Log.i("zzed", "media get yuv data.")
+                zed_surface_view.setYUVData(width, height, yArray, uArray, vArray)
+            }
+
         })
         prepare.setOnClickListener {
             if (statusValue == ZedMediaStatus.STATUS_IDLE.statusValue) {

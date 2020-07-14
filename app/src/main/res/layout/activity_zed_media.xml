@@ -18,45 +18,59 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
-            <Button
-                android:id="@+id/prepare"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:text="PrePare"
+            <com.github.zedmediaplayerlib.opengles.ZedMediaSurfaceView
+                android:id="@+id/zed_surface_view"
+                android:layout_width="match_parent"
+                android:layout_height="300dp"
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintRight_toRightOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintTop_toTopOf="parent"/>
+            
+            <Button
+                android:id="@+id/prepare"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                app:layout_constraintHorizontal_weight="1"
+                android:layout_marginTop="10dp"
+                android:layout_marginStart="10dp"
+                android:layout_marginLeft="10dp"
+                android:text="PrePare"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toLeftOf="@+id/pause"
+                app:layout_constraintTop_toBottomOf="@+id/zed_surface_view" />
 
             <Button
                 android:id="@+id/pause"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                app:layout_constraintHorizontal_weight="1"
                 android:layout_marginTop="10dp"
                 android:text="Pause"
-                app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintRight_toRightOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/prepare" />
+                app:layout_constraintLeft_toRightOf="@+id/prepare"
+                app:layout_constraintRight_toLeftOf="@+id/resume"
+                app:layout_constraintTop_toBottomOf="@+id/zed_surface_view" />
 
             <Button
                 android:id="@+id/resume"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                app:layout_constraintHorizontal_weight="1"
                 android:layout_marginTop="10dp"
                 android:text="Resume"
-                app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintRight_toRightOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/pause" />
+                app:layout_constraintLeft_toRightOf="@+id/pause"
+                app:layout_constraintRight_toLeftOf="@+id/stop"
+                app:layout_constraintTop_toBottomOf="@+id/zed_surface_view" />
 
             <Button
                 android:id="@+id/stop"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                app:layout_constraintHorizontal_weight="1"
                 android:layout_marginTop="10dp"
                 android:text="Stop"
-                app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintRight_toRightOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/resume" />
+                app:layout_constraintLeft_toRightOf="@+id/resume"
+                app:layout_constraintRight_toLeftOf="@+id/next"
+                app:layout_constraintTop_toBottomOf="@+id/zed_surface_view" />
 
             <!--<Button
                 android:id="@+id/seek"
@@ -70,13 +84,16 @@
 
             <Button
                 android:id="@+id/next"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                app:layout_constraintHorizontal_weight="1"
                 android:layout_marginTop="10dp"
+                android:layout_marginEnd="10dp"
+                android:layout_marginRight="10dp"
                 android:text="Next"
-                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintLeft_toRightOf="@+id/stop"
                 app:layout_constraintRight_toRightOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/stop" />
+                app:layout_constraintTop_toBottomOf="@+id/zed_surface_view" />
 
             <TextView
                 android:id="@+id/play_time"

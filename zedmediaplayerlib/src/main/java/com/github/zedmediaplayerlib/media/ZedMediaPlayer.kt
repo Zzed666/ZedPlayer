@@ -25,6 +25,7 @@ class ZedMediaPlayer : Parcelable {
     private var onCompleteListener: OnCompleteListener? = null
     private var onRecordListener: OnRecordListener? = null
     private var onPcmInfoListener: OnPcmInfoListener? = null
+    private var onRenderYUVListener: OnRenderYUVListener? = null
 
     private var zedMediaHelper: ZedMediaHelper? = null
 
@@ -296,8 +297,13 @@ class ZedMediaPlayer : Parcelable {
     /**-------------------------------------------set split pcm---------------------------------------*/
 
     /**-------------------------------------------render yuv---------------------------------------*/
+    fun setOnRenderYUVListener(onRenderYUVListener: OnRenderYUVListener) {
+        this.onRenderYUVListener = onRenderYUVListener
+    }
+
+
     fun cCallRenderYUVBack(width: Int, height: Int, yArray: ByteArray, uArray: ByteArray, vArray: ByteArray) {
-        Log.e("wszed","cCallRenderYUVBack:width:$width,height:$height")
+        onRenderYUVListener?.onRenderYUV(width,height, yArray, uArray, vArray)
     }
     /**-------------------------------------------render yuv---------------------------------------*/
 }
