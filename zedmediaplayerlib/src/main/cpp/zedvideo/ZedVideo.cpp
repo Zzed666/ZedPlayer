@@ -55,7 +55,8 @@ void ZedVideo::decode() {
             releaseTempSource(true);
             continue;
         }
-
+        double diff = getAVFrameDiffTime(pMediaAvFrame);
+        FFLOGE("diff:%f",diff)
         if (renderYUV() != 0) continue;
 
         releaseTempSource(true);
@@ -63,9 +64,47 @@ void ZedVideo::decode() {
     hasExitDecodeThread = true;
 }
 
+double ZedVideo::getAVFrameDiffTime(AVFrame *pAVFrame) {
+    double pts = av_frame_get_best_effort_timestamp(pAVFrame);
+    if (pts == AV_NOPTS_VALUE) pts = 0.0;
+    pts *= av_q2d(video_time_base);
+    if (pts > 0) clock_time = pts;
+    if (zedMediaAudio == nullptr) return 0;
+    double diff = zedMediaAudio->clock_time - clock_time;
+    return diff;
+}
+
+double ZedVideo::getDelayTime(double diff) {
+    if (diff > 0.003) {
+        delay_time = delay_time * 2 / 3;
+        resetDelayTime();
+    } else if (diff < -0.003) {
+        delay_time = delay_time * 3 / 2;
+        resetDelayTime();
+    }
+    if (diff >= 0.5) {
+        delay_time = 0;
+    } else if (diff <= -0.5) {
+        delay_time = delay_time_default * 2;
+    }
+    if (fabs(diff) >= 10) {
+        delay_time = delay_time_default;
+    }
+    return delay_time;
+}
+
+void ZedVideo::resetDelayTime() {
+    if (delay_time < delay_time_default / 2) {
+        delay_time = delay_time_default * 2 / 3;
+    } else if (delay_time > delay_time_default * 2) {
+        delay_time = delay_time_default * 2;
+    }
+}
+
 int ZedVideo::renderYUV() {
     if (pMediaAvFrame != nullptr) {
         if (pMediaAvFrame->format == AV_PIX_FMT_YUV420P) {
+            av_usleep(getDelayTime(getAVFrameDiffTime(pMediaAvFrame)) * 1000 * 1000);
             if (cMediaCallJava != nullptr) {
                 cMediaCallJava->callOnRenderYUV(CTHREADTYPE_CHILD,
                         pMediaAvCodecCtx->width,

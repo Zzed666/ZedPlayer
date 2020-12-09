@@ -201,8 +201,6 @@ class ZedMediaRender(private val mContext: Context) : GLSurfaceView.Renderer {
             mYUV_ByteBuffer_Y?.clear()
             mYUV_ByteBuffer_U?.clear()
             mYUV_ByteBuffer_V?.clear()
-
-            GLES30.glDrawArrays(GLES30.GL_TRIANGLE_STRIP, 0, 4)
         }
     }
 
@@ -219,6 +217,9 @@ class ZedMediaRender(private val mContext: Context) : GLSurfaceView.Renderer {
         GLES30.glClearColor(0.0f, 0.0f, 0.0f, 1.0f)
 
         renderYUV()
+        //if mYUVWidth > 0&& mYUVHeight > 0&& mYUV_ByteBuffer_Y != null&& mYUV_ByteBuffer_U != null&& mYUV_ByteBuffer_V != null
+        //glDrawArrays放在判断里边，如果不满足条件就不会执行glDrawArrays方法，而出现黑屏,所以将glDrawArrays方法放到renderYUV后边执行
+        GLES30.glDrawArrays(GLES30.GL_TRIANGLE_STRIP, 0, 4)
     }
 
 }

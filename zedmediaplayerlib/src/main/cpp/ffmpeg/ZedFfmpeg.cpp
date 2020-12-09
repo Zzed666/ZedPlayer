@@ -81,7 +81,12 @@ void ZedFfmpeg::prepareDecode() {
             foundVideoStream = true;
             zedVideo->video_index = i;
 //            total_duration = pFormatCtx->duration / AV_TIME_BASE;
-//            zedAudio->audio_time_base = pFormatCtx->streams[zedAudio->audio_index]->time_base;
+            zedVideo->video_time_base = pFormatCtx->streams[zedVideo->video_index]->time_base;
+            int num = pFormatCtx->streams[zedVideo->video_index]->avg_frame_rate.num;
+            int den = pFormatCtx->streams[zedVideo->video_index]->avg_frame_rate.den;
+            if (num != 0 && den != 0) {
+                zedVideo->delay_time_default = den * 1.0 / num;
+            }
 //            zedAudio->total_duration = total_duration;
 //            break;
         }
@@ -112,7 +117,7 @@ void ZedFfmpeg::prepareDecode() {
     }
     ffmpeg_load_exit = true;
     pthread_mutex_unlock(&load_thread_mutex);
-    if (cCallJava != NULL) {
+    if (cCallJava != nullptr) {
         cCallJava->callOnPrepare(CTHREADTYPE_CHILD);
     }
 }
@@ -183,6 +188,7 @@ void ZedFfmpeg::startMedia() {
     pthread_mutex_unlock(&status_thread_mutex);
     pthread_mutex_lock(&status_thread_mutex);
     if (zedVideo != nullptr) {
+        zedVideo->zedMediaAudio = zedAudio;
         zedVideo->play();
     }
     pthread_mutex_unlock(&status_thread_mutex);
@@ -203,11 +209,11 @@ void ZedFfmpeg::startMedia() {
          * (ps:.ape文件可能一个AVPacket包含多个AVFrame,所以当设置的缓存队列过大时,seek的时候clear queue的AvPacket,有可能缓存数据已经完毕,从而造成未seek到结尾就播放完,所以此时缓存队列
          * 应该设置足够小,才不会出现这种情况,所以一般设为 1)
          * */
-        if (zedAudio != nullptr && zedAudio->zedQueue != nullptr &&
-            zedAudio->zedQueue->getPacketSize() > 100) {
-            av_usleep(1000 * 100);
-            continue;
-        }
+//        if (zedAudio != nullptr && zedAudio->zedQueue != nullptr &&
+//            zedAudio->zedQueue->getPacketSize() > 100) {
+//            av_usleep(1000 * 100);
+//            continue;
+//        }
         //读取数据到AVPacket
         AVPacket *pPacket = av_packet_alloc();
         pthread_mutex_lock(&seek_thread_mutex);
